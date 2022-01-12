@@ -2,6 +2,7 @@
 # define SERVER_HPP
 # include "ircserv.hpp"
 # include "User.hpp"
+# include "Command.hpp"
 
 class Server
 {
@@ -24,7 +25,9 @@ class Server
         struct sockaddr_in  _addr;
         int                 _serverFd;
         std::vector<User>   _clients;
-
+        std::string         _serverName;
+        std::vector<UserHistory>	_history;
+    
         int _reciveRequest(User &client);
         int _sendResponse(User &client);
 };

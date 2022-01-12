@@ -6,8 +6,10 @@
 # include <netinet/in.h>
 # include <fcntl.h>
 # include <unistd.h>
+# include <map>
 
 # include <cstring>
+# include "response_codes.h"
 
 # define DEFAULT_CONF "config/irc.conf"
 

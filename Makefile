@@ -5,7 +5,6 @@ TEST =	test
 SRCS =	main.cpp\
 		Server.cpp\
 		User.cpp\
-		UserInfo.cpp\
 		UserHistory.cpp
 
 SRC1 =	main1.cpp\

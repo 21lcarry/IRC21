@@ -1,6 +1,7 @@
 #include "User.hpp"
 
-User::User(int sock_fd) : _fd(sock_fd){
+User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false) {
+	_info.servername = servername;
 	_send = -1;
 	std::cout << "new user with " << _fd << " socket" << std::endl;
 }
@@ -35,15 +36,25 @@ User::~User()
 
 User		&User::operator=(User const &rhs)
 {
-	/*if (this != &rhs)
+	if (this != &rhs)
 	{
-		_nick = rhs._nick;
-		_host = rhs._host;
-		_name = rhs._name;
-		_server = rhs._server;
-	}*/
+		_fd = rhs._fd;
+		_info = rhs._info;
+		_send = rhs._send;
+		_request = rhs._request;
+	}
 	return (*this);
 }
+void User::eraseRequest()
+{
+	if (_request.size() > 0)
+	{
+		std::vector<std::string> empty;
+		_request.clear();
+		_request.swap(empty);
+	}
+}
+
 
 void User::requestToVector(std::string request)
 {
@@ -83,7 +94,20 @@ void User::setIsSend(int f)
 	_send = f;
 }
 
+const bool &User::authorized()
+{
+	return _authorized;
+}
 
+const UserInfo &User::getInfo()
+{
+	return _info;
+}
+
+const std::string &User::getPwd()
+{
+	return _pwd;
+}
 
 
 /*

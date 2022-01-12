@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1)
+Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv")
 {
     _serverFd = socket(AF_INET, SOCK_STREAM, 0);
     if (_serverFd < 0)
@@ -32,7 +32,7 @@ void Server::newConnection()
 	setsockopt(newSocket, SOL_SOCKET, SO_NOSIGPIPE, &_opt, (socklen_t)sizeof(_opt));
 	int flag = fcntl(newSocket, F_GETFL);
 	fcntl(newSocket, F_SETFL, flag |  O_NONBLOCK);  //subject
-	_clients.push_back(User(newSocket));
+	_clients.push_back(User(newSocket, _serverName));
 	std::cout << "New connection with socket fd" << newSocket << "\n";
 }
 
@@ -122,21 +122,36 @@ int Server::_reciveRequest(User &client)
         close(fd);
         return 0;
     }
+    client.eraseRequest();
     client.requestToVector(buff);
 
     /*********************************/
     std::vector<std::string> test = client.getRequest();
-    std::cout << "New request vector: " << std::endl;
-    for (std::vector<std::string>::iterator i = test.begin(); i != test.end() - 1; ++i)
-        std::cout << "\"" << *i << "\", ";
-    std::cout << "\"" << *(test.end() - 1) << "\"" << std::endl;
+    if (test.size() > 0)
+    {
+        std::cout << "New request vector: " << std::endl;
+        for (std::vector<std::string>::iterator i = test.begin(); i != test.end() - 1; ++i)
+            std::cout << "\"" << *i << "\", ";
+        std::cout << "\"" << *(test.end() - 1) << "\"" << std::endl;
+    }
     /*********************************/
-    client.setIsSend(5);
+    client.setIsSend(0);
     return 1;
 }
 
 int Server::_sendResponse(User &client)
 {
+    Command request(*this, client);
+    request.handleRequest();
+
+
+
+
+
+
+
+
+
     std::string test_response = "Just an empty response";
     int rc = send(client.getFd(), test_response.c_str(), std::strlen(test_response.c_str()), SO_NOSIGPIPE);
 
