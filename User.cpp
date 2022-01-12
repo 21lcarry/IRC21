@@ -74,6 +74,12 @@ void User::requestToVector(std::string request)
 			break ;
 	}
 }
+
+void User::setPassword(std::string &pwd)
+{
+	_pwd = pwd;
+}
+
 const std::vector<std::string> &User::getRequest()
 {
 	return _request;

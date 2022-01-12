@@ -3,6 +3,8 @@
 #include "Server.hpp"
 #include "User.hpp"
 
+class Server;
+
 class Command {
     public:
         Command(Server &server, User &user);

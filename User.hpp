@@ -45,6 +45,7 @@ public:
 	const std::string &getPwd();
 	/* seters */
 	void setIsSend(int f);
+	void setPassword(std::string &pwd);
 	/* other */
 	void requestToVector(std::string request);
 	void eraseRequest();

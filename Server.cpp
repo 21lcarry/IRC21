@@ -141,8 +141,8 @@ int Server::_reciveRequest(User &client)
 
 int Server::_sendResponse(User &client)
 {
-    Command request(*this, client);
-    request.handleRequest();
+    //Command request(*this, client);
+  //  request.handleRequest();
 
 
 
@@ -152,7 +152,7 @@ int Server::_sendResponse(User &client)
 
 
 
-    std::string test_response = "Just an empty response";
+    std::string test_response = "Just an empty response\n";
     int rc = send(client.getFd(), test_response.c_str(), std::strlen(test_response.c_str()), SO_NOSIGPIPE);
 
     if (rc < 0)
