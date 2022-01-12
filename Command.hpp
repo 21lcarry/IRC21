@@ -22,7 +22,7 @@ class Command {
         std::map<std::string, int (Command::*)(std::string &, std::vector<std::string> &)> _commandMap;
         /*COMMANDS*/
         /*register*/
-        int _cmdPASS(std::string &prefix, std::vector<std::string> &param);
+        int _cmdPASS(std::string &prefix, std::vector<std::string> &param); //done
         int _cmdNICK(std::string &prefix, std::vector<std::string> &param);
         int _cmdUSER(std::string &prefix, std::vector<std::string> &param);
         int _cmdOPER(std::string &prefix, std::vector<std::string> &param);
