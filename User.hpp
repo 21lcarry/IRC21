@@ -19,7 +19,7 @@ private:
 	User();
 	int							_fd;
 	UserInfo					_info;
-	std::vector<UserHistory>	_history;
+//	std::vector<UserHistory>	_history;
 	int							_send;
 	std::vector<std::string>	_request;
 

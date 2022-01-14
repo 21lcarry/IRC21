@@ -30,7 +30,7 @@ public:
 	void		setServer(std::string server);*/
 private:
 	UserHistory(const UserHistory &copy);
-	UserHistory &operator=(const History &copy);
+	UserHistory &operator=(const UserHistory &copy);
 
 	std::vector< UserInfo>				_historyList;
 
