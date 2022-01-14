@@ -3,6 +3,8 @@
 
 #include "ircserv.hpp"
 #include "User.hpp"
+struct UserInfo;
+class User;
 class UserHistory
 {
 /*private:

@@ -1,4 +1,7 @@
 #include "Server.hpp"
+/* todo ????????????????????????????????????????? */
+#define SO_NOSIGPIPE  SO_REUSEADDR
+#define MAX_INPUT 500
 
 Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv")
 {
@@ -29,6 +32,7 @@ void Server::newConnection()
 
 	if (newSocket < 0)
         std::cerr << "ircserv: accept() failed: " <<  std::strerror(errno) << std::endl;
+
 	setsockopt(newSocket, SOL_SOCKET, SO_NOSIGPIPE, &_opt, (socklen_t)sizeof(_opt));
 	int flag = fcntl(newSocket, F_GETFL);
 	fcntl(newSocket, F_SETFL, flag |  O_NONBLOCK);  //subject

@@ -110,3 +110,11 @@ UserHistory::getHistoryByUser(const std::string &nickname) const  {
 void UserHistory::addHistoryByUser(User user) {
 	_historyList.push_back(user.getInfo());
 }
+
+UserHistory::UserHistory() {
+
+}
+
+UserHistory::~UserHistory() {
+
+}
