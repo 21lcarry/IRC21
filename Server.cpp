@@ -1,7 +1,7 @@
 #include "Server.hpp"
 /* todo ????????????????????????????????????????? */
-#define SO_NOSIGPIPE  SO_REUSEADDR
-#define MAX_INPUT 500
+//#define SO_NOSIGPIPE  SO_REUSEADDR
+#define MAX_INPUT 510
 
 Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv")
 {
@@ -84,21 +84,30 @@ void Server::run()
                 {
                     FD_CLR(sdTmp, &readSet);
                     _clients.erase(thisClient);
-                    std::cout << "ircserv: read [" << thisClient->getFd() << "] socket error" << std::endl;
+                    std::cerr << "ircserv: read [" << thisClient->getFd() << "] socket error" << std::endl;
                     break ;
                 }
                 if (rc == 0)
                 {
                     FD_CLR(sdTmp, &readSet);
                     _clients.erase(thisClient);
-                    std::cout << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
+                    std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
                     break ;
                 }
             }
             if (FD_ISSET(sdTmp, &writeSet) && thisClient->isSend() == 0)
             {
                 rc = _sendResponse(*thisClient);
-                if (rc < 0)
+                if (rc == -2)
+                {
+                    std::cerr << "ircserv: Wrong authorization attempt. client " << thisClient->getFd() << std::endl;
+                    FD_CLR(sdTmp, &writeSet);
+                    FD_CLR(sdTmp, &readSet);
+                    close(thisClient->getFd());
+                    _clients.erase(thisClient);
+                    break;
+                }
+                else if (rc < 0)
                 {
                     FD_CLR(sdTmp, &writeSet);
                     break ;
@@ -145,28 +154,22 @@ int Server::_reciveRequest(User &client)
 
 int Server::_sendResponse(User &client)
 {
-    //Command request(*this, client);
-  //  request.handleRequest();
-
-
-
-
-
-
-
-
-
-    std::string test_response = "Just an empty response\n";
-    int rc = send(client.getFd(), test_response.c_str(), std::strlen(test_response.c_str()), SO_NOSIGPIPE);
-
-    if (rc < 0)
+    Command request(*this, client);
+    int rc = request.handleRequest();
+    if (rc == -1)
     {
         std::cerr << "ircserv: send() failed[" << client.getFd() << "]: " <<  std::strerror(errno) << std::endl;
-        client.setIsSend(1);
+//       client.setIsSend(1);
         return -1;
     }
     client.setIsSend(1);
-    return 0;
+    return rc;
+    /*
+    std::string test_response = "Just an empty response\n";
+    int rc = send(client.getFd(), test_response.c_str(), std::strlen(test_response.c_str()), SO_NOSIGPIPE);
+
+*/
+
 }
 
 Server::~Server() {}
@@ -200,4 +203,14 @@ Server &Server::operator=(const Server&o)
         _clients = o._clients;
     }
     return *this;
+}
+
+const std::vector<User> &Server::getClients()
+{
+    return _clients;
+}
+
+const std::string &Server::getPass()
+{
+    return _pass;
 }

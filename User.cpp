@@ -42,6 +42,8 @@ User		&User::operator=(User const &rhs)
 		_info = rhs._info;
 		_send = rhs._send;
 		_request = rhs._request;
+		_authorized = rhs._authorized;
+		_pwd = rhs._pwd;
 	}
 	return (*this);
 }
@@ -80,6 +82,25 @@ void User::setPassword(std::string &pwd)
 	_pwd = pwd;
 }
 
+void User::setInfo(std::string field, std::string &val)
+{
+	if (field == "nickname")
+		_info.nickname = val;
+	else if (field == "username")
+		_info.username = val;
+	else if (field == "hostname")
+		_info.hostname = val;
+	else if (field == "servername")
+		_info.servername = val;
+	else if (field == "realname")
+		_info.realname = val;
+}
+
+void User::setAuthorized(bool f)
+{
+	_authorized = f;
+}
+
 const std::vector<std::string> &User::getRequest()
 {
 	return _request;
@@ -105,7 +126,7 @@ const bool &User::authorized()
 	return _authorized;
 }
 
-const UserInfo &User::getInfo()
+const UserInfo &User::getInfo() const
 {
 	return _info;
 }

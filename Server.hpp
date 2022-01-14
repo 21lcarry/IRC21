@@ -15,6 +15,9 @@ class Server
         void newConnection();
         void run();
 
+        const std::vector<User> &getClients();
+        const std::string &getPass();
+
     private:
         Server();
         std::string         _pass;

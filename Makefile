@@ -5,7 +5,12 @@ TEST =	test
 SRCS =	main.cpp\
 		Server.cpp\
 		User.cpp\
-		UserHistory.cpp
+		UserHistory.cpp\
+		Command.cpp\
+		commands/registerCommands.cpp\
+		commands/userCommands.cpp\
+		commands/channelCommands.cpp\
+		commands/otherCommands.cpp
 
 SRC1 =	main1.cpp\
 		User.cpp

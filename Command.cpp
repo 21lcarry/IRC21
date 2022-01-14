@@ -15,7 +15,7 @@ int Command::handleRequest()
         prefix = *it++;
     if (it != request.end())
         command = *it++;
-    for (it; it != request.end(); ++it)
+    for (;it != request.end(); ++it)
         param.push_back(*it);
     return (_executeCommand(prefix, command, param));
 }

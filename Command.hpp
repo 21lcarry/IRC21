@@ -3,6 +3,14 @@
 #include "Server.hpp"
 #include "User.hpp"
 
+/***TO DO***/
+// _cmdNick():
+// добавление в историю и оповещение о смене ника
+// _authorization добавить дефайны для выхода без ошибок
+// добавить класс ответов
+/***********/
+
+
 class Server;
 
 class Command {
@@ -23,8 +31,8 @@ class Command {
         /*COMMANDS*/
         /*register*/
         int _cmdPASS(std::string &prefix, std::vector<std::string> &param); //done
-        int _cmdNICK(std::string &prefix, std::vector<std::string> &param);
-        int _cmdUSER(std::string &prefix, std::vector<std::string> &param);
+        int _cmdNICK(std::string &prefix, std::vector<std::string> &param); // done 
+        int _cmdUSER(std::string &prefix, std::vector<std::string> &param); // done
         int _cmdOPER(std::string &prefix, std::vector<std::string> &param);
         int _cmdQUIT(std::string &prefix, std::vector<std::string> &param);
         /*users*/
@@ -53,7 +61,10 @@ class Command {
         int _cmdADMIN(std::string &prefix, std::vector<std::string> &param);
         int _cmdTIME(std::string &prefix, std::vector<std::string> &param);
         /*************************/
-
+        
+        bool _validateNick(std::string &nick);
+        bool _nickInUse(std::string &nick);
+        int _authorization();
         int _errorSend(User &user, int code, std::string param1 = "", std::string param2 = "");
         Server  &_server;
         User    &_user;

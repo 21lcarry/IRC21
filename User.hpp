@@ -41,11 +41,13 @@ public:
 	const int &isSend();
 	const std::vector<std::string> &getRequest();
 	const bool &authorized();
-	const UserInfo &getInfo();
+	const UserInfo &getInfo() const;
 	const std::string &getPwd();
 	/* seters */
 	void setIsSend(int f);
 	void setPassword(std::string &pwd);
+	void setInfo(std::string field, std::string &val);
+	void setAuthorized(bool f);
 	/* other */
 	void requestToVector(std::string request);
 	void eraseRequest();
