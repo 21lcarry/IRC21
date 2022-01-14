@@ -2,10 +2,10 @@
 # define USERHISTORY_HPP
 
 #include "ircserv.hpp"
-
+#include "User.hpp"
 class UserHistory
 {
-private:
+/*private:
 	int	_fd;
 
 	std::string	_nick;
@@ -27,7 +27,20 @@ public:
 	void		setNick(std::string nick);
 	void		setHost(std::string host);
 	void		setName(std::string name);
-	void		setServer(std::string server);
+	void		setServer(std::string server);*/
+private:
+	UserHistory(const UserHistory &copy);
+	UserHistory &operator=(const History &copy);
+
+	std::vector< UserInfo>				_historyList;
+
+public:
+	UserHistory();
+	~UserHistory();
+
+	void	addHistoryByUser(User user);
+	 std::vector< const UserInfo *>
+	 getHistoryByUser(const std::string &nickname) const;
 };
 
 #endif

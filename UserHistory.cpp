@@ -1,13 +1,8 @@
 #include "UserHistory.hpp"
-
+/*
 UserHistory::UserHistory(std::string nick, std::string host, std::string name, std::string server)
 {
-/*
-	_nick = nick;
-	_host = host;
-	_name = name;
-	_server = server;
-*/
+
 	setNick(nick);
 	setHost(host);
 	setName(name);
@@ -35,6 +30,8 @@ UserHistory		&UserHistory::operator=(UserHistory const &rhs)
 	}
 	return (*this);
 }
+
+
 
 std::string	UserHistory::getNick()
 {
@@ -95,4 +92,21 @@ void	UserHistory::setName(std::string name)
 void	UserHistory::setServer(std::string server)
 {
 	this->_server = server;
+}
+*/
+
+
+std::vector<const UserInfo *>
+UserHistory::getHistoryByUser(const std::string &nickname) const  {
+	std::vector<const  UserInfo *> filteredHistory;
+	for (size_t i = 0; i < _historyList.size(); ++i)
+	{
+		if (_historyList[i].nickname == nickname)
+			filteredHistory.push_back(&(_historyList[i]));
+	}
+	return filteredHistory;
+}
+
+void UserHistory::addHistoryByUser(User user) {
+	_historyList.push_back(user.getInfo());
 }

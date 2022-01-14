@@ -217,3 +217,8 @@ int Command::_errorSend(User &user, int code, std::string param1, std::string pa
 	}
     return(send(user.getFd(), msg.c_str(), msg.size(), SO_NOSIGPIPE));
 }
+
+int Command::_cmdWHOIS(std::string &prefix, std::vector<std::string> &param) {
+
+	return 0;
+}

@@ -26,8 +26,8 @@ class Server
         int                 _serverFd;
         std::vector<User>   _clients;
         std::string         _serverName;
-        std::vector<UserHistory>	_history;
-    
+        //std::vector<UserHistory>	_history;
+    	UserHistory 	_history;
         int _reciveRequest(User &client);
         int _sendResponse(User &client);
 };
