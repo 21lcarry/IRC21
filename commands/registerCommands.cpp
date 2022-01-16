@@ -42,7 +42,8 @@ bool Command::_nickInUse(std::string &nick)
 int Command::_authorization()
 {
 	int ret = 1;
-	if (_user.getInfo().nickname.size() > 0 && _user.getInfo().username.size() > 0)
+	UserInfo infoUser = _user.getInfo();
+	if (_user.getInfo().nickname.size() > 0 && infoUser.username.size() > 0)
 	{
 		if (_server.getPass().size() == 0 || _user.getPwd() == _server.getPass())
 		{
@@ -50,8 +51,9 @@ int Command::_authorization()
 			{
 				_user.setAuthorized(true);
 
+				_server.addUserHistoru(infoUser);// todo возможно стоит  запихнуть в _user.setAuthorized
 				std::string test = "*MOTD reply should be here*\n";
-				ret = send(_user.getFd(), test.c_str(), test.size(), SO_NOSIGPIPE);
+				ret = send(_user.getFd(), test.c_str(), test.size(), IRC_NOSIGNAL);
 			}
 		}
 		else
@@ -81,10 +83,12 @@ int Command::_cmdNICK(std::string &prefix, std::vector<std::string> &param)
 
 int Command::_cmdUSER(std::string &prefix, std::vector<std::string> &param)
 {
-	if (param.size() < 4)
+	if (param.size() < 4){
 		return (_errorSend(_user, ERR_NEEDMOREPARAMS, "USER"));
-	else if (_user.authorized())
+	}
+	else if (_user.authorized()){
 		return (_errorSend(_user, ERR_ALREADYREGISTRED));
+	}
 	else
 	{
 		std::string realname;
@@ -105,3 +109,4 @@ int Command::_cmdQUIT(std::string &prefix, std::vector<std::string> &param)
 {
 	return 0;
 }
+

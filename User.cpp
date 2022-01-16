@@ -37,9 +37,18 @@ User::~User()
 User		&User::operator=(User const &rhs)
 {
 	if (this != &rhs)
-	{
+	{ // todo
+		UserInfo inf = rhs.getInfo();
 		_fd = rhs._fd;
-		_info = rhs._info;
+		_info.flags = inf.flags;
+		_info.servername = inf.servername;
+		_info.nickname = inf.nickname;
+		_info.username = inf.username;
+		_info.hostname = inf.hostname;
+		_info.awayMessage = inf.awayMessage;
+		_info.registrationTime = inf.registrationTime;
+		_info.realname = inf.realname;
+		//_info.channels = inf.channels;
 		_send = rhs._send;
 		_request = rhs._request;
 		_authorized = rhs._authorized;
@@ -136,6 +145,27 @@ const std::string &User::getPwd()
 	return _pwd;
 }
 
+void User::setFlag(unsigned char flag) {
+	_info.flags |= flag;
+	// todo
+	//if (flag == BREAKCONNECTION && quitMessage.size() == 0)
+	//	quitMessage = "Client exited";
+
+}
+
+void User::removeFlag(unsigned char flag) {
+	_info.flags &= ~flag;
+}
+
+void User::setAwayMessage(const std::string &msg) {
+	_info.awayMessage = msg;
+}
+
+void User::sendMessage(const std::string &msg) const {
+	if (msg.size() > 0)
+		send(_fd, msg.c_str(), msg.size(), IRC_NOSIGNAL); // todo возможно не _fd
+}
+
 
 /*
 std::string	User::getNick()
@@ -199,3 +229,10 @@ void	User::setServer(std::string server)
 	this->_server = server;
 }
 */
+std::string User::getPrefix() const {
+		return std::string(_info.nickname + "!" + _info.username + "@" + _info.hostname);
+}
+
+UserInfo::UserInfo() {
+
+}

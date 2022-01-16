@@ -7,6 +7,7 @@ SRCS =	main.cpp\
 		User.cpp\
 		UserHistory.cpp\
 		Command.cpp\
+		Channel.cpp\
 		commands/registerCommands.cpp\
 		commands/userCommands.cpp\
 		commands/channelCommands.cpp\

@@ -3,13 +3,33 @@
 #include "ircserv.hpp"
 #include "UserHistory.hpp"
 
+#define REGISTERED		0b00000001
+#define INVISIBLE		0b00000010
+#define RECEIVENOTICE	0b00000100
+#define RECEIVEWALLOPS	0b00001000
+#define IRCOPERATOR		0b00010000
+#define AWAY			0b00100000
+#define PINGING			0b01000000
+#define BREAKCONNECTION	0b10000000
+#ifdef __APPLE__
+#define IRC_NOSIGNAL SO_NOSIGPIPE
+#else
+#define IRC_NOSIGNAL MSG_NOSIGNAL
+#endif
+class Channel;
+typedef const std::vector<const Channel *> type_channel_arr;
 struct UserInfo
 {
+	UserInfo();
+
 	std::string							nickname;
 	std::string							username;
 	std::string							hostname;
 	std::string							servername;
 	std::string							realname;
+	std::string 						awayMessage;
+	unsigned char						flags;
+	type_channel_arr					channels;
 	time_t								registrationTime;
 };
 
@@ -48,11 +68,14 @@ public:
 	void setPassword(std::string &pwd);
 	void setInfo(std::string field, std::string &val);
 	void setAuthorized(bool f);
+	void	sendMessage(const std::string &msg) const;
 	/* other */
 	void requestToVector(std::string request);
 	void eraseRequest();
-
-
+	void	setFlag(unsigned char flag);
+	void	removeFlag(unsigned char flag);
+	void	setAwayMessage(const std::string &msg);
+	std::string getPrefix() const;
 //	User(std::string nick, std::string host, std::string name, std::string server);
 //	User(_info(nick, host, name, server), _history(nick, host, name, server));
 /*	std::string	getNick();

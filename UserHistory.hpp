@@ -40,7 +40,7 @@ public:
 	UserHistory();
 	~UserHistory();
 
-	void	addHistoryByUser(User user);
+	void	addHistoryByUser(UserInfo &info);
 	 std::vector< const UserInfo *>
 	 getHistoryByUser(const std::string &nickname) const;
 };

@@ -1,6 +1,5 @@
 #include "Server.hpp"
 /* todo ????????????????????????????????????????? */
-#define SO_NOSIGPIPE  MSG_NOSIGNAL
 #define MAX_INPUT 510
 
 Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv")
@@ -33,7 +32,7 @@ void Server::newConnection()
 	if (newSocket < 0)
         std::cerr << "ircserv: accept() failed: " <<  std::strerror(errno) << std::endl;
 
-	setsockopt(newSocket, SOL_SOCKET, SO_NOSIGPIPE, &_opt, (socklen_t)sizeof(_opt));
+	setsockopt(newSocket, SOL_SOCKET, IRC_NOSIGNAL, &_opt, (socklen_t)sizeof(_opt));
 	int flag = fcntl(newSocket, F_GETFL);
 	fcntl(newSocket, F_SETFL, flag |  O_NONBLOCK);  //subject
 	_clients.push_back(User(newSocket, _serverName));
@@ -213,4 +212,65 @@ const std::vector<User> &Server::getClients()
 const std::string &Server::getPass()
 {
     return _pass;
+}
+
+ UserHistory *Server::getHistory()  {
+	return &_history;
+}
+
+bool Server::userIsConnecting(std::string &nickname) const{
+	size_t	usersCount = _clients.size();
+	for (size_t i = 0; i < usersCount; i++)
+	{
+		if (_clients[i].getInfo().nickname == nickname)
+			return (true);
+	}
+	return (false);
+}
+
+std::vector<const UserInfo *>
+Server::getHistoryByUser(const std::string &nickname) const {
+	return _history.getHistoryByUser(nickname);
+}
+
+void Server::addUserHistoru(UserInfo &info) {
+	_history.addHistoryByUser(info);
+}
+
+std::vector<User> Server::getClient() {
+	return _clients;
+}
+bool	Server::containsNickname(const std::string &nickname) const
+{
+	size_t	usersCount = _clients.size();
+	for (size_t i = 0; i < usersCount; i++)
+	{
+		if (_clients[i].getInfo().nickname== nickname)
+			return (true);
+	}
+	return (false);
+}
+
+std::map<std::string, Channel *> Server::getChannels() {
+	return _channels;
+}
+
+bool Server::containsChannel(const std::string &name) const {
+	try
+	{
+		_channels.at(name);
+		return true;
+	}
+	catch(const std::exception& e)
+	{}
+	return false;
+}
+
+User *Server::getUserByName(const std::string &name) {
+	User	*ret;
+	size_t	usersCount = _clients.size();
+	for (size_t i = 0; i < usersCount; i++)
+		if (_clients[i].getInfo().nickname== name)
+			ret = &_clients[i];
+	return ret;
 }

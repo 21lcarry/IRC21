@@ -1,5 +1,9 @@
 #include "Command.hpp"
-
+#ifdef __APPLE__
+#define IRC_NOSIGNAL SO_NOSIGPIPE
+#else
+#define IRC_NOSIGNAL MSG_NOSIGNAL
+#endif
 Command::Command(Server &server, User &user) : _server(server), _user(user) {
     _initCommandMap();
 }
@@ -25,14 +29,20 @@ int Command::_executeCommand(std::string &prefix, std::string &command, std::vec
     int ret = 0;
     std::map<std::string, int (Command::*)(std::string &, std::vector<std::string> &)>::iterator commandPtr;
 
-    if (!(_user.authorized()) && command != "QUIT" && command != "PASS" && command != "USER" && command != "NICK")
-	    return (_errorSend(_user, ERR_NOTREGISTERED));
+    if (!(_user.authorized()) && command != "QUIT" && command != "PASS" && command != "USER" && command != "NICK") {
+		std::cout << "!!!1" << std::endl;
+		return (_errorSend(_user, ERR_NOTREGISTERED));
+	}
 	else
 	{
-        if ((commandPtr = _commandMap.find(command)) == _commandMap.end())
-		    return _errorSend(_user, ERR_UNKNOWNCOMMAND, command);
-        else
-            return (this->*_commandMap[command])(prefix, param);
+        if ((commandPtr = _commandMap.find(command)) == _commandMap.end()) {
+			std::cout << "!!!2" << std::endl;
+			return _errorSend(_user, ERR_UNKNOWNCOMMAND, command);
+		}
+        else {
+			std::cout << "!!!3" << command << std::endl;
+			return (this->*_commandMap[command])(prefix, param);
+		}
 	}
 }
 
@@ -45,7 +55,7 @@ void Command::_initCommandMap()
     _commandMap["OPER"] = &Command::_cmdOPER;
     _commandMap["QUIT"] = &Command::_cmdQUIT;
     /*users*/
-    _commandMap["PRIVMSG"] = &Command::_cmdPRIVMSG;
+    _commandMap["PRIVMSG"] =  &Command::_cmdPRIVMSG;
     _commandMap["AWAY"] = &Command::_cmdAWAY;
     _commandMap["NOTICE"] = &Command::_cmdNOTICE;
     _commandMap["WHO"] = &Command::_cmdWHO;
@@ -215,10 +225,5 @@ int Command::_errorSend(User &user, int code, std::string param1, std::string pa
 		msg += "UNKNOWN ERROR\n";
 		break;
 	}
-    return(send(user.getFd(), msg.c_str(), msg.size(), SO_NOSIGPIPE));
-}
-
-int Command::_cmdWHOIS(std::string &prefix, std::vector<std::string> &param) {
-
-	return 0;
+    return(send(user.getFd(), msg.c_str(), msg.size(), IRC_NOSIGNAL));
 }

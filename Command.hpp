@@ -2,7 +2,11 @@
 #include "ircserv.hpp"
 #include "Server.hpp"
 #include "User.hpp"
-
+#ifdef __APPLE__
+#define IRC_NOSIGNAL SO_NOSIGPIPE
+#else
+#define IRC_NOSIGNAL MSG_NOSIGNAL
+#endif
 /***TO DO***/
 // _cmdNick():
 // добавление в историю и оповещение о смене ника
@@ -17,7 +21,12 @@ class Command {
     public:
         Command(Server &server, User &user);
         ~Command() {}
-
+	int		sendReply(const std::string &from, const User &user, int rpl, \
+				const std::string &arg1 = "",const std::string &arg2 = "", \
+				const std::string &arg3 = "",const std::string &arg4 = "", \
+				const std::string &arg5 = "",const std::string &arg6 = "", \
+				const std::string &arg7 = "",const std::string &arg8 = "") const;
+	bool	isEqualToRegex(std::string mask, std::string subString);
         int handleRequest();
     private:
         Command();
@@ -36,7 +45,8 @@ class Command {
         int _cmdOPER(std::string &prefix, std::vector<std::string> &param);
         int _cmdQUIT(std::string &prefix, std::vector<std::string> &param);
         /*users*/
-        int _cmdPRIVMSG(std::string &prefix, std::vector<std::string> &param);
+        int _cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param, std::string command = "PRIVMSG");
+		int _cmdPRIVMSG(std::string &prefix, std::vector<std::string> &param);
         int _cmdAWAY(std::string &prefix, std::vector<std::string> &param);
         int _cmdNOTICE(std::string &prefix, std::vector<std::string> &param);
         int _cmdWHO(std::string &prefix, std::vector<std::string> &param);

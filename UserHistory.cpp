@@ -107,14 +107,14 @@ UserHistory::getHistoryByUser(const std::string &nickname) const  {
 	return filteredHistory;
 }
 
-void UserHistory::addHistoryByUser(User user) {
-	_historyList.push_back(user.getInfo());
-}
-
 UserHistory::UserHistory() {
 
 }
 
 UserHistory::~UserHistory() {
 
+}
+
+void UserHistory::addHistoryByUser(UserInfo &info) {
+	_historyList.push_back(info);
 }

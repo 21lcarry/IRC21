@@ -3,7 +3,11 @@
 # include "ircserv.hpp"
 # include "User.hpp"
 # include "Command.hpp"
-
+#ifdef __APPLE__
+#define IRC_NOSIGNAL SO_NOSIGPIPE
+#else
+#define IRC_NOSIGNAL MSG_NOSIGNAL
+#endif
 class Server
 {
     public:
@@ -17,8 +21,17 @@ class Server
 
         const std::vector<User> &getClients();
         const std::string &getPass();
-
-    private:
+		bool userIsConnecting(std::string &nickname) const;
+		std::vector<User> getClient();
+		UserHistory *getHistory();
+		void addUserHistoru(UserInfo &info);
+		std::vector< const UserInfo *>
+		getHistoryByUser(const std::string &nickname) const;
+		bool	containsNickname(const std::string &nickname) const;
+		std::map<std::string, Channel *>	getChannels();
+	bool	containsChannel(const std::string &name) const;
+	User	*getUserByName(const std::string &name);
+private:
         Server();
         std::string         _pass;
         unsigned int        _ip;
@@ -29,10 +42,12 @@ class Server
         int                 _serverFd;
         std::vector<User>   _clients;
         std::string         _serverName;
+		std::map<std::string, Channel *>		_channels;
         //std::vector<UserHistory>	_history;
     	UserHistory 	_history;
         int _reciveRequest(User &client);
         int _sendResponse(User &client);
+
 };
 
 #endif
