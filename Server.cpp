@@ -2,7 +2,7 @@
 /* todo ????????????????????????????????????????? */
 #define MAX_INPUT 510
 
-Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv")
+Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv"), _spam_flag(0)
 {
     _serverFd = socket(AF_INET, SOCK_STREAM, 0);
     if (_serverFd < 0)
@@ -39,10 +39,40 @@ void Server::newConnection()
 	std::cout << "New connection with socket fd" << newSocket << "\n";
 }
 
+bool Server::_checkConnect(User &client)
+{
+    if (client.authorized() && time(0) - client.getActivity() > static_cast<time_t>(MAX_INACTIVE) && !(client.getFlag() & PINGING))
+	{
+		client.sendMessage(":" + client.getInfo().servername + " PING :" + client.getInfo().servername + "\n");
+		client.setFlag(PINGING);
+	}
+	if ((client.getFlag() & PINGING) && time(0) - client.getActivity() > static_cast<time_t>(MAX_RESPONSE))
+        return false;
+    return true;
+}
+
+int Server::_checkActivity(User &client)
+{
+    char buff[MAX_INPUT];
+    if (_spam_flag == 3)
+    {
+        client.incrementDelay();
+        _spam_flag = 0;
+    }
+    if ((time(0) - client.getActivity()) < static_cast<time_t>(client.getDelay()))
+    {
+        std::cout << "SPAM - " << client.getFd() << " \n";
+        ++_spam_flag;
+        client.setIsSend(1);
+        return recv(client.getFd(), buff, MAX_INPUT, MSG_TRUNC);
+    }
+    return -2;
+}
+
 void Server::run()
 {
     fd_set readSet, writeSet;
-	int sdTmp, rc, maxSd;
+	int sdTmp, rc, maxSd, flag;
 
     if (listen(_serverFd, 32) < 0)
 	{
@@ -75,10 +105,30 @@ void Server::run()
             this->newConnection();
         for (std::vector<User>::iterator thisClient = _clients.begin(); thisClient != _clients.end(); ++thisClient)
         {
+            if (!(_checkConnect(*thisClient)))
+            {
+                std::cerr << "ircserv: client is disconnected due to inactivity. client: " << sdTmp << std::endl;
+                FD_CLR(sdTmp, &writeSet);
+                FD_CLR(sdTmp, &readSet);
+                close(sdTmp);
+                _clients.erase(thisClient);
+                break ;
+            }
             sdTmp = thisClient->getFd();
             if (FD_ISSET(sdTmp, &readSet))
             {
-                rc = _reciveRequest(*thisClient);
+                if ((flag = _checkActivity(*thisClient)) <= 0 && flag != -2)
+                {
+                    FD_CLR(sdTmp, &readSet);
+                    close(thisClient->getFd());
+                    _clients.erase(thisClient);
+                    std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
+                    break ;
+                }
+                else if ((flag > 0))
+                    continue ;
+                else
+                    rc = _reciveRequest(*thisClient);
                 if (rc < 0)
                 {
                     FD_CLR(sdTmp, &readSet);
@@ -136,7 +186,7 @@ int Server::_reciveRequest(User &client)
     }
     client.eraseRequest();
     client.requestToVector(buff);
-
+    client.setActivity(time(0));
     /*********************************/
     std::vector<std::string> test = client.getRequest();
     if (test.size() > 0)

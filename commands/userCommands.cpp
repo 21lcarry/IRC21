@@ -153,9 +153,8 @@ int Command::sendReply(const std::string &from, const User &user, int rpl, \
 				const std::string &arg7,const std::string &arg8) const
 {
 	std::string	msg = ":" + from + " ";
-	std::stringstream	ss;
-	ss << rpl;
-	msg += ss.str() + " " + user.getInfo().username + " ";
+
+	msg += std::to_string(rpl) + " " + user.getInfo().nickname + " ";
 	switch (rpl)
 	{
 		case RPL_USERHOST:

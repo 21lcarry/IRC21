@@ -39,17 +39,14 @@ private:
 	User();
 	int							_fd;
 	UserInfo					_info;
-//	std::vector<UserHistory>	_history;
 	int							_send;
 	std::vector<std::string>	_request;
 
 	bool						_authorized;
 	std::string					_pwd;
+	time_t						_last_activity;
+    unsigned int        		_msg_delay;
 
-//	std::string	_nick;
-//	std::string	_host;
-//	std::string	_name;
-//	std::string	_server;
 public:
 	User(int sock_fd, std::string servername);
 	User(User const &src);
@@ -57,18 +54,23 @@ public:
 	User		&operator=(User const &rhs);
 
 	/* geters */
-	int getFd();
+	const int &getFd() const;
 	const int &isSend();
 	const std::vector<std::string> &getRequest();
 	const bool &authorized();
 	const UserInfo &getInfo() const;
 	const std::string &getPwd();
+	const time_t &getActivity() const;
+	const unsigned char &getFlag() const;
+	unsigned int &getDelay();
 	/* seters */
 	void setIsSend(int f);
 	void setPassword(std::string &pwd);
 	void setInfo(std::string field, std::string &val);
 	void setAuthorized(bool f);
 	void	sendMessage(const std::string &msg) const;
+	void setActivity(time_t time);
+	void incrementDelay();
 	/* other */
 	void requestToVector(std::string request);
 	void eraseRequest();
@@ -76,16 +78,7 @@ public:
 	void	removeFlag(unsigned char flag);
 	void	setAwayMessage(const std::string &msg);
 	std::string getPrefix() const;
-//	User(std::string nick, std::string host, std::string name, std::string server);
-//	User(_info(nick, host, name, server), _history(nick, host, name, server));
-/*	std::string	getNick();
-	std::string	getHost();
-	std::string	getName();
-	std::string	getServer();
-	void		setNick(std::string nick);
-	void		setHost(std::string host);
-	void		setName(std::string name);
-	void		setServer(std::string server);*/
+	void pingRequest(std::string cmd);
 };
 
 #endif
