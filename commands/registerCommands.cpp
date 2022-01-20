@@ -1,5 +1,5 @@
 #include "../Command.hpp"
-
+#include "../utils.hpp"
 int Command::_cmdPASS(std::string &prefix, std::vector<std::string> &param)
 {
     if (param.size() == 0)
@@ -52,10 +52,11 @@ int Command::_authorization()
 				_user.setAuthorized(true);
 
 				_server.addUserHistoru(infoUser);//  todo возможно стоит  запихнуть в _user.setAuthorized
+				UserInfo userinfo = _user.getInfo();
 				std::string test = "*MOTD reply should be here*\n";
-				sendReply(_user.getInfo().servername, _user, RPL_MOTDSTART, _user.getInfo().servername);
-				sendReply(_user.getInfo().servername, _user, RPL_MOTD, test);
-				sendReply(_user.getInfo().servername, _user, RPL_ENDOFMOTD);
+				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_MOTDSTART, userinfo.servername);
+				utils::sendReply(_user.getFd(),userinfo.servername, userinfo, RPL_MOTD, test);
+				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_ENDOFMOTD);
 				ret = send(_user.getFd(), test.c_str(), test.size(), IRC_NOSIGNAL);
 			}
 		}
