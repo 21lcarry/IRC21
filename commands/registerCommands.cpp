@@ -51,7 +51,7 @@ int Command::_authorization()
 			{
 				_user.setAuthorized(true);
 
-				_server.addUserHistoru(infoUser);// todo возможно стоит  запихнуть в _user.setAuthorized
+				_server.addUserHistoru(infoUser);//  todo возможно стоит  запихнуть в _user.setAuthorized
 				std::string test = "*MOTD reply should be here*\n";
 				ret = send(_user.getFd(), test.c_str(), test.size(), IRC_NOSIGNAL);
 			}

@@ -37,7 +37,7 @@ User::~User()
 User		&User::operator=(User const &rhs)
 {
 	if (this != &rhs)
-	{ // todo
+	{
 		UserInfo inf = rhs.getInfo();
 		_fd = rhs._fd;
 		_info.flags = inf.flags;
@@ -48,7 +48,8 @@ User		&User::operator=(User const &rhs)
 		_info.awayMessage = inf.awayMessage;
 		_info.registrationTime = inf.registrationTime;
 		_info.realname = inf.realname;
-		//_info.channels = inf.channels;
+		_info.channels.clear();
+		_info.channels.insert(_info.channels.begin(), inf.channels.begin(), inf.channels.end());
 		_send = rhs._send;
 		_request = rhs._request;
 		_authorized = rhs._authorized;
@@ -115,7 +116,7 @@ const std::vector<std::string> &User::getRequest()
 	return _request;
 }
 
-int User::getFd()
+int User::getFd() const
 {
 	return _fd;
 }

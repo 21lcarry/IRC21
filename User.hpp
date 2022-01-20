@@ -17,7 +17,7 @@
 #define IRC_NOSIGNAL MSG_NOSIGNAL
 #endif
 class Channel;
-typedef const std::vector<const Channel *> type_channel_arr;
+typedef  std::vector<const Channel *> type_channel_arr;
 struct UserInfo
 {
 	UserInfo();
@@ -57,7 +57,7 @@ public:
 	User		&operator=(User const &rhs);
 
 	/* geters */
-	int getFd();
+	int getFd() const;
 	const int &isSend();
 	const std::vector<std::string> &getRequest();
 	const bool &authorized();
