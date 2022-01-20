@@ -1,28 +1,12 @@
 #include "User.hpp"
 
-User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false) {
+User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false), _msg_delay(1) {
 	_info.servername = servername;
+	_info.flags = 0;
+	_last_activity = time(0);
 	_send = -1;
 	std::cout << "new user with " << _fd << " socket" << std::endl;
 }
-/*
-User::User(std::string nick, std::string host, std::string name, std::string server)
-{
-	setNick(nick);
-	setHost(host);
-	setName(name);
-	setServer(server);
-}
-*/
-
-/*
-User::User(std::string nick, std::string host, std::string name, std::string server)
-{
-	UserInfo add(nick, host, name, server);
-
-	this->_info = add;
-	this->_history.push_back(UserHistory(add));
-}*/
 
 User::User(User const &src)
 {
@@ -54,6 +38,8 @@ User		&User::operator=(User const &rhs)
 		_request = rhs._request;
 		_authorized = rhs._authorized;
 		_pwd = rhs._pwd;
+		_last_activity = rhs._last_activity;
+		_msg_delay = rhs._msg_delay;
 	}
 	return (*this);
 }
@@ -109,6 +95,7 @@ void User::setInfo(std::string field, std::string &val)
 void User::setAuthorized(bool f)
 {
 	_authorized = f;
+	_info.registrationTime = time(0);
 }
 
 const std::vector<std::string> &User::getRequest()
@@ -119,6 +106,11 @@ const std::vector<std::string> &User::getRequest()
 int User::getFd() const
 {
 	return _fd;
+}
+
+const unsigned char &User::getFlag() const
+{
+	return _info.flags;
 }
 
 const int &User::isSend()
@@ -154,6 +146,11 @@ void User::setFlag(unsigned char flag) {
 
 }
 
+void User::setActivity(time_t time)
+{
+	_last_activity = time;
+}
+
 void User::removeFlag(unsigned char flag) {
 	_info.flags &= ~flag;
 }
@@ -163,73 +160,28 @@ void User::setAwayMessage(const std::string &msg) {
 }
 
 void User::sendMessage(const std::string &msg) const {
+	int bytes;
 	if (msg.size() > 0)
-		send(_fd, msg.c_str(), msg.size(), IRC_NOSIGNAL); // todo возможно не _fd
+		bytes = send(_fd, msg.c_str(), msg.size(), IRC_NOSIGNAL); // todo возможно не _fd
+	if (bytes < 0)
+		std::cerr << "ircserv: send() failed on sendMessage() [" << _fd << "]: " <<  std::strerror(errno) << std::endl;
 }
 
-
-/*
-std::string	User::getNick()
+void User::incrementDelay()
 {
-	return this->_nick;
+	++_msg_delay;
 }
 
-std::string	User::getHost()
+const time_t &User::getActivity() const
 {
-	return this->_host;
+	return _last_activity;
 }
 
-std::string	User::getName()
+unsigned int &User::getDelay()
 {
-	return this->_name;
+	return _msg_delay;
 }
 
-std::string	User::getServer()
-{
-	return this->_server;
-}
-
-void	User::setNick(std::string nick)
-{
-	int	rtrn = 0;
-
-	if (nick.length() <= 9)
-	{
-		for (int i = 0; i < nick.length(); ++i)
-			if ((nick[i] >= 'a' && nick[i] <= 'z') || (nick[i] >= 'A' && nick[i] <= 'Z') ||\
-			(nick[i] >= '0' && nick[i] <= '9') || nick[i] == '-' || nick[i] == '^' ||\
-			nick[i] == '[' || nick[i] == ']' || nick[i] == '{' || nick[i] == '}' ||\
-			nick[i] == '\\')
-				rtrn = 1;
-			else
-			{
-				rtrn = 0;
-				break ;
-			}
-	}
-	else
-		rtrn = 0;
-	if (rtrn == 0)
-		std::cerr << "Invalid NickName of User" << std::endl;
-	else
-		this->_nick = nick;
-}
-
-void	User::setHost(std::string host)
-{
-	this->_host = host;
-}
-
-void	User::setName(std::string name)
-{
-	this->_name = name;
-}
-
-void	User::setServer(std::string server)
-{
-	this->_server = server;
-}
-*/
 std::string User::getPrefix() const {
 		return std::string(_info.nickname + "!" + _info.username + "@" + _info.hostname);
 }

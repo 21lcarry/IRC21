@@ -6,7 +6,14 @@ int Command::_cmdWALLOPS(std::string &prefix, std::vector<std::string> &param)
 }
 int Command::_cmdPING(std::string &prefix, std::vector<std::string> &param)
 {
-    return 0;
+    if (time(0) - _user.getActivity() > static_cast<time_t>(MAX_INACTIVE))
+	{
+		_user.sendMessage(":" + _user.getInfo().servername + " PING :" + _user.getInfo().servername + "\n");
+		_user.setFlag(PINGING);
+	}
+	if ((_user.getFlag() & PINGING) && time(0) - _user.getActivity() > static_cast<time_t>(MAX_RESPONSE))
+		return -2;
+    return 1;
 }
 int Command::_cmdISON(std::string &prefix, std::vector<std::string> &param)
 {

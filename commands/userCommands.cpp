@@ -14,7 +14,7 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 	if (param.size() == 1)
 		return (_errorSend(_user, ERR_NOTEXTTOSEND));
 
-	std::queue<std::string> receivers = utils::split(param[0], ',', false);
+	std::queue<std::string> receivers = split(param[0], ',', false);
 	std::set<std::string> uniqReceivers;
 	UserInfo infoUser = _user.getInfo();
 	if (command == "NOTICE" && (receivers.size() > 1 \
@@ -48,7 +48,7 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		{
 			Channel *receiverChannel = _server.getChannels()[*it];
 			// check that user can send message to channel (user is operator or speaker on moderated channel)
-			if (receiverChannel->getFlags() & MODERATED && (!receiverChannel->isOperator(_user) && !receiverChannel->isSpeaker(_user)))
+			if (receiverChannel->getFlags() & MODERATED && (!receiverChannel->isOperator(infoUser) && !receiverChannel->isSpeaker(infoUser)))
 				_errorSend(_user, ERR_CANNOTSENDTOCHAN, *it);
 			else
 				receiverChannel->sendMessage(command + " " + *it + " :" + param[1] + "\n", _user, false);
@@ -56,7 +56,7 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		else
 		{
 			if (command == "PRIVMSG" && (_server.getUserByName(*it)->getInfo().flags & AWAY))
-				utils::sendReply(_user.getFd(), infoUser.servername,infoUser , RPL_AWAY, *it, _server.getUserByName(*it)->getInfo().awayMessage);
+				sendReply(infoUser.servername, _user, RPL_AWAY, *it, _server.getUserByName(*it)->getInfo().awayMessage);
 			if (command != "NOTICE" || (_server.getUserByName(*it)->getInfo().flags & RECEIVENOTICE))
 				_server.getUserByName(*it)->sendMessage(":" + _user.getPrefix() + " " + command + " " + *it + " :" + param[1] + "\n");
 		}
@@ -71,18 +71,17 @@ int Command::_cmdPRIVMSG(std::string &prefix, std::vector<std::string> &param)
 
 int Command::_cmdAWAY(std::string &prefix, std::vector<std::string> &param)
 {
-	UserInfo userinfo = _user.getInfo();
+
 	if (param.size() == 0)
 	{
 		_user.removeFlag(AWAY);
-		utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_UNAWAY);
+		sendReply(_user.getInfo().servername, _user, RPL_UNAWAY);
 	}
 	else
 	{
 		_user.setFlag(AWAY);
 		_user.setAwayMessage(param[0]);
-
-		utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_NOWAWAY);
+		sendReply(_user.getInfo().servername, _user, RPL_NOWAWAY);
 	}
 	return 0;
 }
@@ -96,7 +95,7 @@ int Command::_cmdWHO(std::string &prefix, std::vector<std::string> &param)
 	if (param.size() == 0)
 		return (_errorSend(_user, ERR_NEEDMOREPARAMS, "WHO"));
 	std::vector<User> clients = this->_server.getClient();
-	UserInfo userinfo = _user.getInfo();
+	UserInfo infoUser = _user.getInfo();
 	for (size_t i = 0; i < clients.size(); ++i)
 	{
 		UserInfo clientInfo = clients[i].getInfo();
@@ -109,12 +108,12 @@ int Command::_cmdWHO(std::string &prefix, std::vector<std::string> &param)
 			for (int j = userChannels.size() - 1; j >= 0; --j)
 			{
 				if ((!(userChannels[j]->getFlags() & SECRET) && !(userChannels[j]->getFlags() & PRIVATE)) \
-				|| (userChannels[j]->containsNickname(userinfo.nickname)))
+				|| (userChannels[j]->containsNickname(infoUser.nickname)))
 				{
 					channelName = userChannels[j]->getName();
-					if (userChannels[j]->isOperator( clients[i]))
+					if (userChannels[j]->isOperator(clientInfo))
 						userStatus = "@";
-					else if (userChannels[j]->isSpeaker( clients[i]))
+					else if (userChannels[j]->isSpeaker(clientInfo))
 						userStatus = "+";
 					break;
 				}
@@ -122,11 +121,11 @@ int Command::_cmdWHO(std::string &prefix, std::vector<std::string> &param)
 
 			if (param.size() == 1  || param[1] != "o" \
 			|| (param[1] == "o" && (clientInfo.flags & IRCOPERATOR)))
-				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_WHOREPLY, channelName, clientInfo.username, clientInfo.hostname, \
+				sendReply(infoUser.servername, _user, RPL_WHOREPLY, channelName, clientInfo.username, clientInfo.hostname, \
 							clientInfo.servername, clientInfo.nickname, "H" + userStatus, "0", clientInfo.realname);
 		}
 	}
-	return (utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_ENDOFWHO, userinfo.nickname));
+	return (sendReply(infoUser.servername, _user, RPL_ENDOFWHO, infoUser.nickname));
 }
 
 bool	Command::isEqualToRegex(std::string mask, std::string subString)

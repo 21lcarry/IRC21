@@ -8,6 +8,9 @@
 #else
 #define IRC_NOSIGNAL MSG_NOSIGNAL
 #endif
+#define MAX_INACTIVE 60U
+#define MAX_RESPONSE 120U
+
 class Server
 {
     public:
@@ -42,9 +45,14 @@ private:
         int                 _serverFd;
         std::vector<User>   _clients;
         std::string         _serverName;
+        id_t                _spam_flag;
 		std::map<std::string, Channel *>		_channels;
         //std::vector<UserHistory>	_history;
     	UserHistory 	_history;
+
+
+	    bool _checkConnect(User &client);
+        int _checkActivity(User &client);
         int _reciveRequest(User &client);
         int _sendResponse(User &client);
 
