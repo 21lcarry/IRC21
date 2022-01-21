@@ -17,6 +17,7 @@ namespace utils {
 	std::queue<std::string>	split(const std::string &s, char sep, bool include);
 	int _errorSend(const User &user, int code, const std::string param1 = "", const std::string param2 = ""); // todo dublicate!!!
 	bool						isEqualToRegex(std::string mask, std::string subString);
+	bool	isValidChannelName(const std::string &name);
 };
 
 #endif //IRC_UTILS_HPP

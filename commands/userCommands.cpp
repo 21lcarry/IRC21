@@ -17,7 +17,7 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 	UserInfo infoUser = _user.getInfo();
 	if (command == "NOTICE" && (receivers.size() > 1 \
 	|| receivers.front()[0] == '#' || receivers.front()[0] == '&'))
-		return (_errorSend(_user, ERR_NOSUCHNICK, param[0]));
+		return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
 
 	while (receivers.size() > 0)
 	{
@@ -92,7 +92,7 @@ int Command::_cmdWHO(std::string &prefix, std::vector<std::string> &param)
 {
 	if (param.size() == 0)
 		return (_errorSend(_user, ERR_NEEDMOREPARAMS, "WHO"));
-	std::vector<User> clients = this->_server.getClient();
+	std::vector<User> clients = _server.getClients();
 	UserInfo infoUser = _user.getInfo();
 	for (size_t i = 0; i < clients.size(); ++i)
 	{
@@ -193,7 +193,7 @@ int Command::_cmdWHOIS(std::string &prefix, std::vector<std::string> &param) {
 		return (_errorSend(_user, ERR_NONICKNAMEGIVEN));
 	UserInfo userinfo = _user.getInfo();
 	bool suchNick = false;
-	std::vector<User> clients = this->_server.getClient();
+	std::vector<User> clients = _server.getClients();
 	for (size_t i = 0; i < clients.size(); ++i)
 	{
 		UserInfo clientInfo = clients[i].getInfo();

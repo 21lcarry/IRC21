@@ -443,6 +443,17 @@ namespace utils{
 		}
 	}
 
-
+	bool	isValidChannelName(const std::string &name)
+	{
+		if (name[0] != '#' && name[0] != '&')
+			return false;
+		for (size_t i = 1; i < name.size(); i++)
+		{
+			if (name[i] == ' ' || name[i] == 7 || name[i] == 0 \
+			|| name[i] == 13 || name[i] == 10 || name[i] == ',')
+				return false;
+		}
+		return true;
+	}
 }
 #include "utils.hpp"

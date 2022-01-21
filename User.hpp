@@ -36,7 +36,7 @@ struct UserInfo
 class User
 {
 private:
-	User();
+
 	int							_fd;
 	UserInfo					_info;
 //	std::vector<UserHistory>	_history;
@@ -53,6 +53,7 @@ private:
 //	std::string	_name;
 //	std::string	_server;
 public:
+	User();
 	User(int sock_fd, std::string servername);
 	User(User const &src);
 	~User();
@@ -84,6 +85,9 @@ public:
 	void	setAwayMessage(const std::string &msg);
 	std::string getPrefix() const;
 	void pingRequest(std::string cmd);
+	void	addChannel(const Channel &channel);
+	bool	isOnChannel(const std::string &name) const;
+	void	removeChannel(const std::string &name);
 };
 
 #endif

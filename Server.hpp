@@ -3,6 +3,7 @@
 # include "ircserv.hpp"
 # include "User.hpp"
 # include "Command.hpp"
+# include "Channel.hpp"
 #ifdef __APPLE__
 #define IRC_NOSIGNAL SO_NOSIGPIPE
 #else
@@ -10,7 +11,7 @@
 #endif
 #define MAX_INACTIVE 60U
 #define MAX_RESPONSE 120U
-
+#define MAX_CHANNEl 10
 class Server
 {
     public:
@@ -25,7 +26,7 @@ class Server
         const std::vector<User> &getClients();
         const std::string &getPass();
 		bool userIsConnecting(std::string &nickname) const;
-		std::vector<User> getClient();
+		//std::vector<User> getClient(); //todo dublicate
 		UserHistory *getHistory();
 		void addUserHistoru(UserInfo &info);
 		std::vector< const UserInfo *>
@@ -34,6 +35,8 @@ class Server
 		std::map<std::string, Channel *>	getChannels();
 	bool	containsChannel(const std::string &name) const;
 	User	*getUserByName(const std::string &name);
+	int		connectToChannel(const User &user, const std::string &name, const std::string &key);
+	int		handleChanFlags(std::vector<std::string> &param, User &user, const std::string &commands);
 private:
         Server();
         std::string         _pass;
@@ -46,7 +49,7 @@ private:
         std::vector<User>   _clients;
         std::string         _serverName;
         id_t                _spam_flag;
-		std::map<std::string, Channel *>		_channels;
+	std::map<std::string, Channel *>		_channels;
         //std::vector<UserHistory>	_history;
     	UserHistory 	_history;
 

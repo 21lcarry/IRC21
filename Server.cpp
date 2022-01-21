@@ -1,4 +1,5 @@
 #include "Server.hpp"
+
 /* todo ????????????????????????????????????????? */
 #define MAX_INPUT 510
 
@@ -287,9 +288,6 @@ void Server::addUserHistoru(UserInfo &info) {
 	_history.addHistoryByUser(info);
 }
 
-std::vector<User> Server::getClient() {
-	return _clients;
-}
 bool	Server::containsNickname(const std::string &nickname) const
 {
 	size_t	usersCount = _clients.size();
@@ -323,4 +321,130 @@ User *Server::getUserByName(const std::string &name) {
 		if (_clients[i].getInfo().nickname== name)
 			ret = &_clients[i];
 	return ret;
+}
+
+int Server::connectToChannel(const User &user, const std::string &name,
+							 const std::string &key) {
+	try
+	{
+		Channel	*tmp = _channels.at(name);
+		tmp->connect(user, key);
+		return (1);
+	}
+	catch(const std::exception& e)
+	{
+		_channels[name] = new Channel(name, user, key);
+	}
+	return (1);
+}
+
+int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const std::string &commands)
+{
+	std::string	chanName = param[0];
+	std::string	flag = param[1];
+	if (flag == "+o")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else if (!containsNickname(param[2]))
+			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
+		else
+			_channels[chanName]->addOperator(*(getUserByName(param[2])));
+	}
+	else if (flag == "-o")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else if (!containsNickname(param[2]))
+			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
+		else
+			_channels[chanName]->removeOperator(*(getUserByName(param[2])));
+	}
+	else if (flag == "+p")
+		_channels[chanName]->setFlag(PRIVATE);
+	else if (flag == "-p")
+		_channels[chanName]->removeFlag(PRIVATE);
+	else if (flag == "+s")
+		_channels[chanName]->setFlag(SECRET);
+	else if (flag == "-s")
+		_channels[chanName]->removeFlag(SECRET);
+	else if (flag == "+i")
+		_channels[chanName]->setFlag(INVITEONLY);
+	else if (flag == "-i")
+		_channels[chanName]->removeFlag(INVITEONLY);
+	else if (flag == "+t")
+		_channels[chanName]->setFlag(TOPICSET);
+	else if (flag == "-t")
+		_channels[chanName]->removeFlag(TOPICSET);
+	else if (flag == "+n")
+	{}
+	else if (flag == "-n")
+	{}
+	else if (flag == "+m")
+		_channels[chanName]->setFlag(MODERATED);
+	else if (flag == "-m")
+		_channels[chanName]->removeFlag(MODERATED);
+	else if (flag == "+l")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else
+			_channels[chanName]->setLimit(atoi(param[2].c_str()));
+	}
+	else if (flag == "-l")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else
+			_channels[chanName]->setLimit(0);
+	}
+	else if (flag == "+b")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else
+			_channels[chanName]->addBanMask(param[2]);
+	}
+	else if (flag == "-b")
+	{
+		if (param.size() < 3)
+			return utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else
+			_channels[chanName]->removeBanMask(param[2]);
+	}
+	else if (flag == "+v")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else if (!containsNickname(param[2]))
+			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
+		else
+			_channels[chanName]->addSpeaker(*(getUserByName(param[2])));
+	}
+	else if (flag == "-v")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else if (!containsNickname(param[2]))
+			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
+		else
+			_channels[chanName]->removeSpeaker(*(getUserByName(param[2])));
+	}
+	else if (flag == "+k")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else
+			_channels[chanName]->setKey(user, param[2]);
+	}
+	else if (flag == "-k")
+	{
+		if (param.size() < 3)
+			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
+		else
+			_channels[chanName]->setKey(user, "");
+	}
+	else
+		return utils::_errorSend(user, ERR_UNKNOWNMODE, flag);
+	return 0;
 }

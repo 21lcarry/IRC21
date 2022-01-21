@@ -1,4 +1,5 @@
 #include "User.hpp"
+#include "Channel.hpp"
 
 User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false), _msg_delay(1) {
 	_info.servername = servername;
@@ -184,6 +185,32 @@ unsigned int &User::getDelay()
 
 std::string User::getPrefix() const {
 		return std::string(_info.nickname + "!" + _info.username + "@" + _info.hostname);
+}
+
+void User::addChannel(const Channel &channel) {
+	_info.channels.push_back(&channel);
+}
+
+User::User() {
+
+}
+
+bool User::isOnChannel(const std::string &name) const {
+	for (size_t i = 0; i < _info.channels.size(); i++){
+		const Channel *ch = (const Channel *) _info.channels.at(i); //todo
+		if (ch->getName() == name)
+			return true;
+	}
+	return false;
+}
+
+void User::removeChannel(const std::string &name) {
+	std::vector<const Channel *>::iterator	begin = _info.channels.begin();
+	std::vector<const Channel *>::iterator	end = _info.channels.end();
+	for (; begin != end; ++begin)
+		if ((*begin)->getName() == name)
+			break ;
+	_info.channels.erase(begin);
 }
 
 UserInfo::UserInfo() {

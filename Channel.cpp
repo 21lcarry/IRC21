@@ -20,7 +20,7 @@ Channel::Channel(const Channel &other) {
 	copy(other);
 }
 
-std::string Channel::getName() const {
+const std::string Channel::getName() const {
 	return _name;
 }
 
