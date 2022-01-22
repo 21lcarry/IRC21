@@ -190,7 +190,7 @@ int Command::_cmdWHOWAS(std::string &prefix, std::vector<std::string> &param)
 }
 int Command::_cmdWHOIS(std::string &prefix, std::vector<std::string> &param) {
 	if (param.size() == 0)
-		return (_errorSend(_user, ERR_NONICKNAMEGIVEN));
+		return (utils::_errorSend(_user, ERR_NONICKNAMEGIVEN));
 	UserInfo userinfo = _user.getInfo();
 	bool suchNick = false;
 	std::vector<User> clients = _server.getClients();
