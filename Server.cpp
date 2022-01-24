@@ -85,6 +85,7 @@ void Server::run()
     while(true)
     {
         timeout.tv_sec = 2;
+        timeout.tv_usec = 0;
         maxSd = _serverFd;
         FD_ZERO(&readSet);
         FD_ZERO(&writeSet);
