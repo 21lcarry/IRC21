@@ -2,8 +2,8 @@
 // Created by Администратор on 18.01.2022.
 //
 
-#ifndef IRC_UTILS_HPP
-#define IRC_UTILS_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 #include <queue>
 #include <ostream>
 #include <string>

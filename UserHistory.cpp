@@ -19,6 +19,6 @@ UserHistory::~UserHistory() {
 
 }
 
-void UserHistory::addHistoryByUser(UserInfo &info) {
+void UserHistory::addHistoryByUser(const UserInfo &info) {
 	_historyList.push_back(info);
 }

@@ -7,13 +7,6 @@
 #else
 #define IRC_NOSIGNAL MSG_NOSIGNAL
 #endif
-/***TO DO***/
-// _cmdNick():
-// добавление в историю и оповещение о смене ника
-// _authorization добавить дефайны для выхода без ошибок
-// добавить класс ответов
-/***********/
-
 
 class Server;
 
@@ -70,7 +63,8 @@ class Command {
         bool _validateNick(std::string &nick);
         bool _nickInUse(std::string &nick);
         int _authorization();
-        int _errorSend(User &user, int code, std::string param1 = "", std::string param2 = "");
+     //   int _errorSend(User &user, int code, std::string param1 = "", std::string param2 = "");
+        void _notifyUsers(const std::string &msg);
         Server  &_server;
         User    &_user;
 };

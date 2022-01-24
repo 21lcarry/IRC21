@@ -8,9 +8,9 @@
 int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 						  std::string command) {
 	if (param.size() == 0)
-		return (_errorSend(_user, ERR_NORECIPIENT, command));
+		return (utils::_errorSend(_user, ERR_NORECIPIENT, command));
 	if (param.size() == 1)
-		return (_errorSend(_user, ERR_NOTEXTTOSEND));
+		return (utils::_errorSend(_user, ERR_NOTEXTTOSEND));
 
 	std::queue<std::string> receivers = utils::split(param[0], ',', false);
 	std::set<std::string> uniqReceivers;
@@ -23,20 +23,20 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 	{
 		// checking if there contains dublicate receiver
 		if (uniqReceivers.find(receivers.front()) != uniqReceivers.end())
-			return (_errorSend(_user, ERR_TOOMANYTARGETS, receivers.front()));
+			return (utils::_errorSend(_user, ERR_TOOMANYTARGETS, receivers.front()));
 		// if receiver is channel
 		if (receivers.front()[0] == '#' || receivers.front()[0] == '&')
 		{
 			// checking if there such a channel
 			if (!_server.containsChannel(receivers.front()))
-				return (_errorSend(_user, ERR_NOSUCHNICK, receivers.front()));
+				return (utils::_errorSend(_user, ERR_NOSUCHNICK, receivers.front()));
 			// check that the current user is in the channel
 			if (!_server.getChannels()[receivers.front()]->containsNickname(_user.getInfo().nickname))
-				return (_errorSend(_user, ERR_CANNOTSENDTOCHAN, receivers.front()));
+				return (utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, receivers.front()));
 		}
 			// checking if there such a nickname
 		else if (!_server.containsNickname(receivers.front()))
-			return (_errorSend(_user, ERR_NOSUCHNICK, param[0]));
+			return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
 		uniqReceivers.insert(receivers.front());
 		receivers.pop();
 	}
@@ -47,7 +47,7 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 			Channel *receiverChannel = _server.getChannels()[*it];
 			// check that user can send message to channel (user is operator or speaker on moderated channel)
 			if (receiverChannel->getFlags() & MODERATED && (!receiverChannel->isOperator(_user) && !receiverChannel->isSpeaker(_user)))
-				_errorSend(_user, ERR_CANNOTSENDTOCHAN, *it);
+				utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, *it);
 			else
 				receiverChannel->sendMessage(command + " " + *it + " :" + param[1] + "\n", _user, false);
 		}
@@ -91,7 +91,7 @@ int Command::_cmdNOTICE(std::string &prefix, std::vector<std::string> &param)
 int Command::_cmdWHO(std::string &prefix, std::vector<std::string> &param)
 {
 	if (param.size() == 0)
-		return (_errorSend(_user, ERR_NEEDMOREPARAMS, "WHO"));
+		return (utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "WHO"));
 	std::vector<User> clients = _server.getClients();
 	UserInfo infoUser = _user.getInfo();
 	for (size_t i = 0; i < clients.size(); ++i)
@@ -163,12 +163,12 @@ int Command::_cmdWHOWAS(std::string &prefix, std::vector<std::string> &param)
 {
 	UserInfo userinfo = _user.getInfo();
 	if (param.size() == 0)
-		return (_errorSend(_user, ERR_NONICKNAMEGIVEN, param[0]));
+		return (utils::_errorSend(_user, ERR_NONICKNAMEGIVEN, param[0]));
 	else if (!this->_server.userIsConnecting(param[0]))
 	{
 		 std::vector<const UserInfo *> historyList = this->_server.getHistoryByUser(param[0]);
 		if (historyList.size() == 0)
-			_errorSend(_user, ERR_WASNOSUCHNICK, param[0]);
+			utils::_errorSend(_user, ERR_WASNOSUCHNICK, param[0]);
 		else
 		{
 			UserInfo userinfo = _user.getInfo();
@@ -233,6 +233,6 @@ int Command::_cmdWHOIS(std::string &prefix, std::vector<std::string> &param) {
 		}
 	}
 	if (!suchNick)
-		_errorSend(_user, ERR_NOSUCHNICK, param[0]);
+		utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]);
 	return (utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_ENDOFWHOIS, param[0]));
 }

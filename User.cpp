@@ -1,7 +1,7 @@
 #include "User.hpp"
 #include "Channel.hpp"
 
-User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false), _msg_delay(1) {
+User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false), _msg_delay(1), _queue(0) {
 	_info.servername = servername;
 	_info.flags = 0;
 	_last_activity = time(0);
@@ -60,18 +60,27 @@ void User::requestToVector(std::string request)
 	size_t start, end;
 	std::string token;
 
-    start = request.find_first_not_of(" \n\t", 0);
+    start = request.find_first_not_of(" \t", 0);
 	while (1) 
     {
-		end = request.find_first_of(" \n\t", start);
+		end = request.find_first_of(" \t", start);
 		if (end == std::string::npos)
 			break;
 		token = request.substr(start, end - start);
 		_request.push_back(token);
-        start = request.find_first_not_of(" \n\t", end);
+        start = request.find_first_not_of(" \t", end);
 		if (start == std::string::npos)
 			break ;
 	}
+	token = request.substr(start, end - start);
+	if (token[token.size() - 1] == '\n')
+		token = token.substr(0, token.size() - 1);
+	_request.push_back(token);
+}
+
+const bool User::hasNoQueue() const
+{
+	return _raw_requests.empty();
 }
 
 void User::setPassword(std::string &pwd)
@@ -91,6 +100,8 @@ void User::setInfo(std::string field, std::string &val)
 		_info.servername = val;
 	else if (field == "realname")
 		_info.realname = val;
+	else if (field == "quitMessage")
+		_info.quitMessage = val;
 }
 
 void User::setAuthorized(bool f)
@@ -150,6 +161,27 @@ void User::setFlag(unsigned char flag) {
 void User::setActivity(time_t time)
 {
 	_last_activity = time;
+}
+
+void User::setRawRequests(std::queue<std::string> &val)
+{
+	_queue += val.size();
+
+	int i = val.size();
+	while (i > 0)
+	{
+		_raw_requests.push(val.front());
+		val.pop();
+		--i;
+	}
+}
+
+std::string User::getNextRequest()
+{
+	std::string ret = _raw_requests.front();
+
+	_raw_requests.pop();
+	return ret;
 }
 
 void User::removeFlag(unsigned char flag) {

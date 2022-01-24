@@ -9,12 +9,13 @@
 /*   Updated: 2022/01/19 09:42:29 by cshanda          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+#pragma once
 #include <ostream>
 #include "User.hpp"
 #include "utils.hpp"
 
-#ifndef IRC_CHANEL_HH
-#define IRC_CHANEL_HH
+#ifndef CHANNEL_HPP
+#define CHANNEL_HPP
 
 #define PRIVATE        0b000001
 #define SECRET        0b000010
@@ -25,8 +26,6 @@
 
 class Channel {
 public:
-
-	Channel() = delete;
 
 	Channel(const std::string &name, const User &creator,
 			const std::string &pass = "");
@@ -95,6 +94,7 @@ public:
 	virtual ~Channel();
 
 private:
+	Channel();
 	std::string _name;
 	std::vector<const User *> _operators;
 	std::vector<const User *> _speakers;

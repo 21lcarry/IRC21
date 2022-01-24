@@ -241,8 +241,8 @@ namespace utils{
 				msg += "UNKNOWN REPLY\n";
 				break;
 		}
-		send(fd, msg.c_str(), msg.size(), IRC_NOSIGNAL);
-		return 0;
+		std::cout << "\n\nREPLY:\n" << msg << "\n\n";
+		return(send(fd, msg.c_str(), msg.size(), IRC_NOSIGNAL));
 	}
 	std::queue<std::string>	split(const std::string &s, char sep, bool include)
 	{
@@ -408,6 +408,7 @@ namespace utils{
 				msg += "UNKNOWN ERROR\n";
 				break;
 		}
+		std::cout << "\n\nERROR:\n" << msg << "\n\n";
 		return(send(user.getFd(), msg.c_str(), msg.size(), IRC_NOSIGNAL));
 	}
 	bool	isEqualToRegex(std::string mask, std::string subString)

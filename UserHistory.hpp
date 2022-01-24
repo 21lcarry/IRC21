@@ -18,7 +18,7 @@ class UserHistory
 		UserHistory();
 		~UserHistory();
 
-		void	addHistoryByUser(UserInfo &info);
+		void	addHistoryByUser(const UserInfo &info);
 		std::vector< const UserInfo *>
 		getHistoryByUser(const std::string &nickname) const;
 };

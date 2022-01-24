@@ -3,11 +3,15 @@
 int Command::_cmdPASS(std::string &prefix, std::vector<std::string> &param)
 {
     if (param.size() == 0)
-		return (_errorSend(_user, ERR_NEEDMOREPARAMS, "PASS"));
+		return (utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "PASS"));
 	else if (_user.authorized() == true)
-		return (_errorSend(_user, ERR_ALREADYREGISTRED));
+		return (utils::_errorSend(_user, ERR_ALREADYREGISTRED));
 	else
+	{
+		if (param[0][0] == ':' && param[0] != _server.getPass())
+			param[0] = param[0].substr(1, param[0].size() - 1);
 		_user.setPassword(param[0]);
+	}
 	return 1;
 }
 
@@ -66,20 +70,37 @@ int Command::_authorization()
 	return ret;
 }
 
+void Command::_notifyUsers(const std::string &msg)
+{
+	const std::vector<const Channel *> chans = _user.getInfo().channels;
+	for (size_t i = 0; i < _server.getClients().size(); ++i)
+	{
+		for (size_t j = 0; j < chans.size(); j++)
+		{
+			if (chans[j]->containsNickname(_server.getClients()[i].getInfo().nickname))
+			{
+				_server.getClients()[i].sendMessage(msg);
+				break ;
+			}
+		}
+	}
+}
+
 int Command::_cmdNICK(std::string &prefix, std::vector<std::string> &param)
 {
     if (param.size() == 0)
-			return (_errorSend(_user, ERR_NEEDMOREPARAMS, "NICK"));
+			return (utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "NICK"));
 	else if (!_validateNick(param[0]) || param[0] == _user.getInfo().nickname)
-		return (_errorSend(_user, ERR_ERRONEUSNICKNAME, param[0]));
+		return (utils::_errorSend(_user, ERR_ERRONEUSNICKNAME, param[0]));
 	else if (!_nickInUse(param[0]))
-		return (_errorSend(_user, ERR_NICKNAMEINUSE, param[0]));
+		return (utils::_errorSend(_user, ERR_NICKNAMEINUSE, param[0]));
 	else
 	{
-//		if (_user.authorized())
-//		{
-		// добавление в историю и оповещение о смене ника
-//		}
+		if (_user.authorized())
+		{
+			_notifyUsers(":" + _user.getPrefix() + " NICK" + " " + param[0] + "\n");
+			_server.addUserHistoru(_user.getInfo());
+		}
 		_user.setInfo("nickname", param[0]);
 	}
 	return (_authorization());
@@ -88,10 +109,10 @@ int Command::_cmdNICK(std::string &prefix, std::vector<std::string> &param)
 int Command::_cmdUSER(std::string &prefix, std::vector<std::string> &param)
 {
 	if (param.size() < 4){
-		return (_errorSend(_user, ERR_NEEDMOREPARAMS, "USER"));
+		return (utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "USER"));
 	}
 	else if (_user.authorized()){
-		return (_errorSend(_user, ERR_ALREADYREGISTRED));
+		return (utils::_errorSend(_user, ERR_ALREADYREGISTRED));
 	}
 	else
 	{
@@ -106,11 +127,26 @@ int Command::_cmdUSER(std::string &prefix, std::vector<std::string> &param)
 }
 
 int Command::_cmdOPER(std::string &prefix, std::vector<std::string> &param)
-{
-	return 0;
+{	
+	if (param.size() < 2)
+		return utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "OPER");
+	else if (_server.getOperators().size() == 0)
+		return utils::_errorSend(_user, ERR_NOOPERHOST);
+	else
+	{
+		std::string pwd = _server.getOperators().at(param[0]);
+		if (param[1] == pwd)
+		{
+			_user.setFlag(IRCOPERATOR);
+			return utils::sendReply(_user.getFd(), _user.getInfo().servername, _user.getInfo(), RPL_YOUREOPER);
+		}
+		return utils::_errorSend(_user, ERR_PASSWDMISMATCH);
+	}
 }
 int Command::_cmdQUIT(std::string &prefix, std::vector<std::string> &param)
 {
-	return 0;
+	if (param.size() > 0)
+		_user.setInfo("quitMessage", param[0]);
+	_server.addUserHistoru(_user.getInfo());
+	return (-2);
 }
-

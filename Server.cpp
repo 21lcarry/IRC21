@@ -59,13 +59,13 @@ int Server::_checkActivity(User &client)
     {
         client.incrementDelay();
         _spam_flag = 0;
-    }
-    if ((time(0) - client.getActivity()) < static_cast<time_t>(client.getDelay()))
-    {
-        std::cout << "SPAM - " << client.getFd() << " \n";
-        ++_spam_flag;
-        client.setIsSend(1);
-        return recv(client.getFd(), buff, MAX_INPUT, MSG_TRUNC);
+        if ((time(0) - client.getActivity()) < static_cast<time_t>(client.getDelay()))
+        {
+            std::cout << "SPAM - " << client.getFd() << " \n";
+            ++_spam_flag;
+            client.setIsSend(1);
+            return recv(client.getFd(), buff, MAX_INPUT, MSG_TRUNC);
+        }
     }
     return -2;
 }
@@ -74,6 +74,7 @@ void Server::run()
 {
     fd_set readSet, writeSet;
 	int sdTmp, rc, maxSd, flag;
+    struct timeval timeout;
 
     if (listen(_serverFd, 32) < 0)
 	{
@@ -83,6 +84,7 @@ void Server::run()
 	std::cout << "Server listen port " << _port << "\n";
     while(true)
     {
+        timeout.tv_sec = 2;
         maxSd = _serverFd;
         FD_ZERO(&readSet);
         FD_ZERO(&writeSet);
@@ -94,7 +96,7 @@ void Server::run()
             FD_SET(sdTmp, &writeSet);
             maxSd = (sdTmp > maxSd) ? sdTmp : maxSd;
         }
-        rc = select(maxSd + 1, &readSet, &writeSet, NULL, NULL);
+        rc = select(maxSd + 1, &readSet, &writeSet, NULL, &timeout);
         if (rc < 0)
         {
             std::cerr << "ircserv: select() failed: " <<  std::strerror(errno) << std::endl;
@@ -174,6 +176,8 @@ int Server::_reciveRequest(User &client)
     int fd = client.getFd();
     bzero(buff, MAX_INPUT);
     int rc = recv(fd, buff, MAX_INPUT, 0);
+    std::string request(buff);
+
     if (rc < 0)
     {
         std::cerr << "ircserv: recv() failed: " <<  std::strerror(errno) << std::endl;
@@ -185,41 +189,47 @@ int Server::_reciveRequest(User &client)
         close(fd);
         return 0;
     }
-    client.eraseRequest();
-    client.requestToVector(buff);
-    client.setActivity(time(0));
-    /*********************************/
-    std::vector<std::string> test = client.getRequest();
-    if (test.size() > 0)
+    if (request.length() > 512)
+		request = request.substr(0, 510) + "\r\n";
+	while (request.find("\r\n") != std::string::npos)
+		request.replace(request.find("\r\n"), 2, "\n");
+	if (request.size() > 1)
     {
-        std::cout << "New request vector: " << std::endl;
-        for (std::vector<std::string>::iterator i = test.begin(); i != test.end() - 1; ++i)
-            std::cout << "\"" << *i << "\", ";
-        std::cout << "\"" << *(test.end() - 1) << "\"" << std::endl;
+        std::queue<std::string> tmp = utils::split(request, '\n', true);
+		client.setRawRequests(tmp);
     }
-    /*********************************/
+    client.setActivity(time(0));
     client.setIsSend(0);
     return 1;
 }
 
 int Server::_sendResponse(User &client)
 {
-    Command request(*this, client);
-    int rc = request.handleRequest();
-    if (rc == -1)
+    int rc = -1;
+    while (!client.hasNoQueue())
     {
-        std::cerr << "ircserv: send() failed[" << client.getFd() << "]: " <<  std::strerror(errno) << std::endl;
-//       client.setIsSend(1);
-        return -1;
+        client.eraseRequest();
+        client.requestToVector(client.getNextRequest());
+        /*********************************/
+        std::vector<std::string> test = client.getRequest();
+        if (test.size() > 0)
+        {
+            std::cout << "New request vector: " << std::endl;
+            for (std::vector<std::string>::iterator i = test.begin(); i != test.end() - 1; ++i)
+                std::cout << "\"" << *i << "\", ";
+            std::cout << "\"" << *(test.end() - 1) << "\"" << std::endl;
+        }
+        /*********************************/
+        Command request(*this, client);
+        rc = request.handleRequest();
+        if (rc == -1)
+        {
+            std::cerr << "ircserv: send() failed[" << client.getFd() << "]: " <<  std::strerror(errno) << std::endl;
+            return -1;
+        }
     }
     client.setIsSend(1);
     return rc;
-    /*
-    std::string test_response = "Just an empty response\n";
-    int rc = send(client.getFd(), test_response.c_str(), std::strlen(test_response.c_str()), SO_NOSIGPIPE);
-
-*/
-
 }
 
 Server::~Server() {}
@@ -284,7 +294,7 @@ Server::getHistoryByUser(const std::string &nickname) const {
 	return _history.getHistoryByUser(nickname);
 }
 
-void Server::addUserHistoru(UserInfo &info) {
+void Server::addUserHistoru(const UserInfo &info) {
 	_history.addHistoryByUser(info);
 }
 
@@ -336,6 +346,11 @@ int Server::connectToChannel(const User &user, const std::string &name,
 		_channels[name] = new Channel(name, user, key);
 	}
 	return (1);
+}
+
+const std::map<std::string, std::string> &Server::getOperators() const
+{
+    return _operators;
 }
 
 int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const std::string &commands)

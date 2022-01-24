@@ -31,13 +31,13 @@ int Command::_executeCommand(std::string &prefix, std::string &command, std::vec
 
     if (!(_user.authorized()) && command != "QUIT" && command != "PASS" && command != "USER" && command != "NICK") {
 		std::cout << "!!!1" << std::endl;
-		return (_errorSend(_user, ERR_NOTREGISTERED));
+		return (utils::_errorSend(_user, ERR_NOTREGISTERED));
 	}
 	else
 	{
         if ((commandPtr = _commandMap.find(command)) == _commandMap.end()) {
 			std::cout << "!!!2" << std::endl;
-			return _errorSend(_user, ERR_UNKNOWNCOMMAND, command);
+			return utils::_errorSend(_user, ERR_UNKNOWNCOMMAND, command);
 		}
         else {
 			std::cout << "!!!3" << command << std::endl;
@@ -80,6 +80,8 @@ void Command::_initCommandMap()
     _commandMap["ADMIN"] = &Command::_cmdADMIN;
     _commandMap["TIME"] = &Command::_cmdTIME;
 }
+
+/*
 
 int Command::_errorSend(User &user, int code, std::string param1, std::string param2)
 {
@@ -226,4 +228,4 @@ int Command::_errorSend(User &user, int code, std::string param1, std::string pa
 		break;
 	}
     return(send(user.getFd(), msg.c_str(), msg.size(), IRC_NOSIGNAL));
-}
+}*/

@@ -7,6 +7,7 @@
 # include <fcntl.h>
 # include <unistd.h>
 # include <map>
+# include <queue>
 
 # include <cstring>
 # include "response_codes.h"

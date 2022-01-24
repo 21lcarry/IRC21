@@ -28,6 +28,7 @@ struct UserInfo
 	std::string							servername;
 	std::string							realname;
 	std::string 						awayMessage;
+	std::string							quitMessage;
 	unsigned char						flags;
 	type_channel_arr					channels;
 	time_t								registrationTime;
@@ -42,11 +43,13 @@ private:
 //	std::vector<UserHistory>	_history;
 	int							_send;
 	std::vector<std::string>	_request;
+	std::queue<std::string>		_raw_requests;
 
 	bool						_authorized;
 	std::string					_pwd;
 	time_t						_last_activity;
     unsigned int        		_msg_delay;
+	int							_queue;
 
 //	std::string	_nick;
 //	std::string	_host;
@@ -69,6 +72,8 @@ public:
 	const time_t &getActivity() const;
 	const unsigned char &getFlag() const;
 	unsigned int &getDelay();
+	std::string getNextRequest();
+	const bool hasNoQueue() const;
 	/* seters */
 	void setIsSend(int f);
 	void setPassword(std::string &pwd);
@@ -77,6 +82,7 @@ public:
 	void	sendMessage(const std::string &msg) const;
 	void setActivity(time_t time);
 	void incrementDelay();
+	void setRawRequests(std::queue<std::string> &val);
 	/* other */
 	void requestToVector(std::string request);
 	void eraseRequest();
