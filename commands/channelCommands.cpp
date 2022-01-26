@@ -180,16 +180,19 @@ int Command::_cmdNAMES(std::string &prefix, std::vector<std::string> &param)
 		std::vector<std::string>	usersWithoutChannel;
 		for (size_t i = 0; i < _server.getClients().size(); i++)
 			usersWithoutChannel.push_back(_server.getClients()[i].getInfo().nickname);
-		std::map<std::string, Channel *>::const_iterator	beg = _server.getChannels().begin();
-		std::map<std::string, Channel *>::const_iterator	end = _server.getChannels().end();
-		for (; beg != end; ++beg)
+		if (_server.getChannels().size() > 0)
 		{
-			if (!((*beg).second->getFlags() & SECRET) && !((*beg).second->getFlags() & PRIVATE))
+			std::map<std::string, Channel *>::const_iterator	beg = _server.getChannels().begin();
+			std::map<std::string, Channel *>::const_iterator	end = _server.getChannels().end();
+			for (; beg != end; ++beg)
 			{
-				(*beg).second->displayNames(_user);
-				for (size_t i = 0; i < usersWithoutChannel.size(); i++)
-					if ((*beg).second->containsNickname(usersWithoutChannel[i]))
-						usersWithoutChannel.erase(usersWithoutChannel.begin() + i--);
+				if (!((*beg).second->getFlags() & SECRET) && !((*beg).second->getFlags() & PRIVATE))
+				{
+					(*beg).second->displayNames(_user);
+					for (size_t i = 0; i < usersWithoutChannel.size(); i++)
+						if ((*beg).second->containsNickname(usersWithoutChannel[i]))
+							usersWithoutChannel.erase(usersWithoutChannel.begin() + i--);
+				}
 			}
 		}
 		std::string	names;

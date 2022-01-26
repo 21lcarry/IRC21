@@ -83,6 +83,8 @@ void Server::_disconnect(std::vector<User>::iterator &thisClient)
         std::cout << std::to_string(j++) << ":" <<  thisClient->getFd() << " DISCONNECT\n";
         const Channel *chan = *i;
         const_cast<Channel*>(chan)->disconnect(*thisClient);
+        if(const_cast<Channel*>(chan)->isEmpty())
+            _channels.erase(chan->getName());
     }
     _clients.erase(thisClient);
 }
