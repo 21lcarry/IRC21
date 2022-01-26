@@ -22,6 +22,7 @@ Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(p
         std::cerr << "ircserv: bind() failed: " <<  std::strerror(errno) << std::endl;
         exit(EXIT_FAILURE);
     }
+    _clients.reserve(MAX_USERS);
     fcntl(_serverFd, F_SETFL, O_NONBLOCK);
     std::cout << "server started on 0.0.0.0:" << _port << std::endl;
 }
@@ -44,6 +45,7 @@ bool Server::_checkConnect(User &client)
 {
     if (client.authorized() && time(0) - client.getActivity() > static_cast<time_t>(MAX_INACTIVE) && !(client.getFlag() & PINGING))
 	{
+        std::cout << "\n PING to client fd " << client.getFd() << "\n\n";
 		client.sendMessage(":" + client.getInfo().servername + " PING :" + client.getInfo().servername + "\n");
 		client.setFlag(PINGING);
 	}
@@ -68,6 +70,21 @@ int Server::_checkActivity(User &client)
         }
     }
     return -2;
+}
+
+void Server::_disconnect(std::vector<User>::iterator &thisClient)
+{
+    type_channel_arr chans = thisClient->getInfo().channels;
+    int j = 0;
+
+    close(thisClient->getFd());
+    for (type_channel_arr::const_iterator i = chans.begin(); i != chans.end(); ++i)
+    {
+        std::cout << std::to_string(j++) << ":" <<  thisClient->getFd() << " DISCONNECT\n";
+        const Channel *chan = *i;
+        const_cast<Channel*>(chan)->disconnect(*thisClient);
+    }
+    _clients.erase(thisClient);
 }
 
 void Server::run()
@@ -109,23 +126,24 @@ void Server::run()
             this->newConnection();
         for (std::vector<User>::iterator thisClient = _clients.begin(); thisClient != _clients.end(); ++thisClient)
         {
+            sdTmp = thisClient->getFd();
             if (!(_checkConnect(*thisClient)))
             {
                 std::cerr << "ircserv: client is disconnected due to inactivity. client: " << sdTmp << std::endl;
                 FD_CLR(sdTmp, &writeSet);
                 FD_CLR(sdTmp, &readSet);
-                close(sdTmp);
-                _clients.erase(thisClient);
+                _disconnect(thisClient);
                 break ;
             }
-            sdTmp = thisClient->getFd();
             if (FD_ISSET(sdTmp, &readSet))
             {
                 if ((flag = _checkActivity(*thisClient)) <= 0 && flag != -2)
                 {
                     FD_CLR(sdTmp, &readSet);
-                    close(thisClient->getFd());
-                    _clients.erase(thisClient);
+                    FD_CLR(sdTmp, &writeSet);
+                    _disconnect(thisClient);
+       //             close(thisClient->getFd());
+        //            _clients.erase(thisClient);
                     std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
                     break ;
                 }
@@ -136,14 +154,18 @@ void Server::run()
                 if (rc < 0)
                 {
                     FD_CLR(sdTmp, &readSet);
-                    _clients.erase(thisClient);
+                    FD_CLR(sdTmp, &writeSet);
+                    _disconnect(thisClient);
+   //                 _clients.erase(thisClient);
                     std::cerr << "ircserv: read [" << thisClient->getFd() << "] socket error" << std::endl;
                     break ;
                 }
                 if (rc == 0)
                 {
                     FD_CLR(sdTmp, &readSet);
-                    _clients.erase(thisClient);
+                    FD_CLR(sdTmp, &writeSet);
+                    _disconnect(thisClient);
+         //           _clients.erase(thisClient);
                     std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
                     break ;
                 }
@@ -156,8 +178,9 @@ void Server::run()
                     std::cerr << "ircserv: Wrong authorization attempt. client " << thisClient->getFd() << std::endl;
                     FD_CLR(sdTmp, &writeSet);
                     FD_CLR(sdTmp, &readSet);
-                    close(thisClient->getFd());
-                    _clients.erase(thisClient);
+                    _disconnect(thisClient);
+     //               close(thisClient->getFd());
+       //             _clients.erase(thisClient);
                     break;
                 }
                 else if (rc < 0)
@@ -199,6 +222,7 @@ int Server::_reciveRequest(User &client)
         std::queue<std::string> tmp = utils::split(request, '\n', true);
 		client.setRawRequests(tmp);
     }
+    client.removeFlag(PINGING);
     client.setActivity(time(0));
     client.setIsSend(0);
     return 1;
@@ -352,6 +376,33 @@ int Server::connectToChannel(const User &user, const std::string &name,
 const std::map<std::string, std::string> &Server::getOperators() const
 {
     return _operators;
+}
+
+
+int		Server::handleUserFlags(std::string &flag, User &user)
+{
+	if (flag == "+i")
+		user.setFlag(INVISIBLE);
+	else if (flag == "-i")
+		user.removeFlag(INVISIBLE);
+	else if (flag == "+s")
+		user.setFlag(RECEIVENOTICE);
+	else if (flag == "-s")
+		user.removeFlag(RECEIVENOTICE);
+	else if (flag == "+w")
+		user.setFlag(RECEIVEWALLOPS);
+	else if (flag == "-w")
+		user.removeFlag(RECEIVEWALLOPS);
+	else if (flag == "+o")
+	{}
+	else if (flag == "-o")
+		user.removeFlag(IRCOPERATOR);
+	else
+	{
+		utils::_errorSend(user, ERR_UMODEUNKNOWNFLAG);
+		return -1;
+	}
+	return 0;
 }
 
 int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const std::string &commands)

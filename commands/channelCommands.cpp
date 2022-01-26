@@ -1,5 +1,6 @@
 #include "../Command.hpp"
 #include "../utils.hpp"
+
 int Command::_cmdMODE(std::string &prefix, std::vector<std::string> &param)
 {
 	if (param.size() < 1)
@@ -42,7 +43,7 @@ int Command::_cmdMODE(std::string &prefix, std::vector<std::string> &param)
 						flags += "o";
 					utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_UMODEIS, flags);
 				}
-				else if (_server.handleChanFlags(param, _user, "MODE") != -1)
+				else if (_server.handleUserFlags(param[1], _user) != -1)
 					_user.sendMessage(":" + _user.getPrefix() + " MODE " +param[0] + " " + param[1] + "\n");
 			}
 		}
@@ -52,20 +53,27 @@ int Command::_cmdMODE(std::string &prefix, std::vector<std::string> &param)
 int Command::_cmdTOPIC(std::string &prefix, std::vector<std::string> &param)
 {
 	if (param.size() < 1)
-		utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "TOPIC");
+		return(utils::_errorSend(_user, ERR_NEEDMOREPARAMS, "TOPIC"));
 	else if (!_server.containsChannel(param[0]))
-		utils::_errorSend(_user, ERR_NOTONCHANNEL, param[0]);
+		return(utils::_errorSend(_user, ERR_NOTONCHANNEL, param[0]));
 	else
 	{
 		Channel	*chan = _server.getChannels().at(param[0]);
 		if (!chan->containsNickname(_user.getInfo().nickname))
-			utils::_errorSend(_user, ERR_NOTONCHANNEL, param[0]);
+			return(utils::_errorSend(_user, ERR_NOTONCHANNEL, param[0]));
 		else if (param.size() < 2)
 			chan->displayTopic(_user);
 		else
-			chan->setTopic(_user, param[1]);
+		{
+			std::string topic;
+
+			for (std::vector<std::string>::iterator it = (param.begin() + 1); it != param.end(); ++it)
+				topic += ((*it)[0] == ':') ? it->substr(1, it->size() - 1) : *it + " ";
+			topic = topic.substr(0, topic.size() - 1);
+			chan->setTopic(_user, topic);
+		}
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdJOIN(std::string &prefix, std::vector<std::string> &param)
 {
@@ -86,13 +94,11 @@ int Command::_cmdJOIN(std::string &prefix, std::vector<std::string> &param)
 				utils::_errorSend(_user, ERR_NOSUCHCHANNEL, chans.front());
 			else if (_user.getInfo().channels.size() >= MAX_CHANNEl)
 				utils::_errorSend(_user, ERR_TOOMANYCHANNELS, chans.front());
-			else if (_server.connectToChannel(_user, chans.front(), key) == 1) {
-
+			else if (_server.connectToChannel(_user, chans.front(), key) == 1)
 				_user.addChannel(*(_server.getChannels().at(chans.front())));
-			}
 		}
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdINVITE(std::string &prefix, std::vector<std::string> &param)
 {

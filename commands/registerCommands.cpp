@@ -61,7 +61,6 @@ int Command::_authorization()
 				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_MOTDSTART, userinfo.servername);
 				utils::sendReply(_user.getFd(),userinfo.servername, userinfo, RPL_MOTD, test);
 				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_ENDOFMOTD);
-				ret = send(_user.getFd(), test.c_str(), test.size(), IRC_NOSIGNAL);
 			}
 		}
 		else

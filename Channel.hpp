@@ -17,12 +17,12 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#define PRIVATE        0b000001
-#define SECRET        0b000010
-#define MODERATED    0b000100
-#define INVITEONLY    0b001000
-#define TOPICSET    0b010000
-#define NOMSGOUT    0b100000
+#define PRIVATE			0b000001
+#define SECRET			0b000010
+#define MODERATED		0b000100
+#define INVITEONLY		0b001000
+#define TOPICSET		0b010000
+#define NOMSGOUT		0b100000
 
 class Channel {
 public:

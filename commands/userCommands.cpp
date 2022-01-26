@@ -12,12 +12,18 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 	if (param.size() == 1)
 		return (utils::_errorSend(_user, ERR_NOTEXTTOSEND));
 
+	std::string msg;
 	std::queue<std::string> receivers = utils::split(param[0], ',', false);
 	std::set<std::string> uniqReceivers;
 	UserInfo infoUser = _user.getInfo();
 	if (command == "NOTICE" && (receivers.size() > 1 \
 	|| receivers.front()[0] == '#' || receivers.front()[0] == '&'))
 		return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
+
+	for (std::vector<std::string>::iterator it = (param.begin() + 1); it != param.end(); ++it)
+		msg += (((*it)[0] == ':') ? it->substr(1, it->size() - 1) : *it) + " ";
+	msg = msg.substr(0, msg.size() - 1);
+
 
 	while (receivers.size() > 0)
 	{
@@ -46,17 +52,18 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		{
 			Channel *receiverChannel = _server.getChannels()[*it];
 			// check that user can send message to channel (user is operator or speaker on moderated channel)
+
 			if (receiverChannel->getFlags() & MODERATED && (!receiverChannel->isOperator(_user) && !receiverChannel->isSpeaker(_user)))
 				utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, *it);
 			else
-				receiverChannel->sendMessage(command + " " + *it + " :" + param[1] + "\n", _user, false);
+				receiverChannel->sendMessage(command + " " + *it + " :" + msg + "\n", _user, false);
 		}
 		else
 		{
 			if (command == "PRIVMSG" && (_server.getUserByName(*it)->getInfo().flags & AWAY))
 				utils::sendReply(_user.getFd(), infoUser.servername, infoUser, RPL_AWAY, *it, _server.getUserByName(*it)->getInfo().awayMessage);
 			if (command != "NOTICE" || (_server.getUserByName(*it)->getInfo().flags & RECEIVENOTICE))
-				_server.getUserByName(*it)->sendMessage(":" + _user.getPrefix() + " " + command + " " + *it + " :" + param[1] + "\n");
+				_server.getUserByName(*it)->sendMessage(":" + _user.getPrefix() + " " + command + " " + *it + " :" + msg + "\n");
 		}
 	}
 	return 0;
@@ -163,8 +170,8 @@ int Command::_cmdWHOWAS(std::string &prefix, std::vector<std::string> &param)
 {
 	UserInfo userinfo = _user.getInfo();
 	if (param.size() == 0)
-		return (utils::_errorSend(_user, ERR_NONICKNAMEGIVEN, param[0]));
-	else if (!this->_server.userIsConnecting(param[0]))
+		return (utils::_errorSend(_user, ERR_NONICKNAMEGIVEN));
+	if (!this->_server.userIsConnecting(param[0]))
 	{
 		 std::vector<const UserInfo *> historyList = this->_server.getHistoryByUser(param[0]);
 		if (historyList.size() == 0)

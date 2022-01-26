@@ -29,6 +29,7 @@ int Command::_executeCommand(std::string &prefix, std::string &command, std::vec
     int ret = 0;
     std::map<std::string, int (Command::*)(std::string &, std::vector<std::string> &)>::iterator commandPtr;
 
+	std::cout << (void*)&_user << std::endl;
     if (!(_user.authorized()) && command != "QUIT" && command != "PASS" && command != "USER" && command != "NICK") {
 		std::cout << "!!!1" << std::endl;
 		return (utils::_errorSend(_user, ERR_NOTREGISTERED));

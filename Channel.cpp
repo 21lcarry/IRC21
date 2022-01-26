@@ -117,21 +117,25 @@ void Channel::removeInvited(const User &user) {
 bool Channel::isInvited(const User &user) const {
 
 	for (size_t i = 0; i < _invitedUsers.size(); i++)
+	{
 		if (_invitedUsers[i]->getPrefix() == user.getPrefix())
 			return true;
+	}
 	return false;
 }
 
 void Channel::disconnect(const User &user) {
 	std::vector<const User *>::iterator it = _users.begin();
 	std::vector<const User *>::iterator end = _users.end();
-	while (it != end && *it != &user) { // todo
-		break;
-		it++;
+	while (it != end) {
+ 		if (*it == &user)
+		{
+			_users.erase(it);
+			removeOperator(user);
+			removeSpeaker(user);
+		}
+		++it;
 	}
-	_users.erase(it);
-	removeOperator(user);
-	removeSpeaker(user);
 }
 
 void Channel::displayNames(const User &user) {
@@ -310,6 +314,7 @@ void Channel::sendInfo(const User &user) {
 Channel::Channel(const std::string &name, const User &creator,
 				 const std::string &pass) :
 		_name(name), _pass(pass), _userLimit(0), _flags(NOMSGOUT) {
+
 	_users.push_back(&creator);
 	_operators.push_back(&creator);
 	sendInfo(creator);

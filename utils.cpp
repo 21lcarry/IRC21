@@ -11,7 +11,7 @@ namespace utils{
 				const std::string &arg7,const std::string &arg8)
 	{
 		std::string	msg = ":" + from + " ";
-		msg += std::to_string(rpl) + " " + userInfo.username + " ";
+		msg += std::to_string(rpl) + " " + userInfo.nickname + " ";
 		switch (rpl)
 		{
 			case RPL_USERHOST:

@@ -4,6 +4,7 @@
 User::User(int sock_fd, std::string servername) : _fd(sock_fd), _authorized(false), _msg_delay(1), _queue(0) {
 	_info.servername = servername;
 	_info.flags = 0;
+	_info.hostname = "127.0.0.1";
 	_last_activity = time(0);
 	_send = -1;
 	std::cout << "new user with " << _fd << " socket" << std::endl;
@@ -16,7 +17,7 @@ User::User(User const &src)
 
 User::~User()
 {
-	std::cout << "QUIT message" << std::endl;
+	std::cout << "QUIT message: " << (void*)this << std::endl;
 }
 
 User		&User::operator=(User const &rhs)
@@ -216,7 +217,9 @@ unsigned int &User::getDelay()
 }
 
 std::string User::getPrefix() const {
-		return std::string(_info.nickname + "!" + _info.username + "@" + _info.hostname);
+//	std::string prefix = _info.nickname + "!" + _info.username + "@" + _info.hostname;
+
+	return std::string(_info.nickname + "!" + _info.username + "@" + _info.hostname);
 }
 
 void User::addChannel(const Channel &channel) {

@@ -21,6 +21,7 @@
 #define adminName "" //todo
 #define adminNickname "" //todo
 #define adminEmail "" //todo
+#define MAX_USERS 256
 class Server
 {
     public:
@@ -46,6 +47,7 @@ class Server
         User	*getUserByName(const std::string &name);
         int		connectToChannel(const User &user, const std::string &name, const std::string &key);
         int		handleChanFlags(std::vector<std::string> &param, User &user, const std::string &commands);
+        int     handleUserFlags(std::string &flag, User &user);
         const std::map<std::string, std::string> &getOperators() const;
 private:
         Server();
@@ -69,6 +71,7 @@ private:
         int _checkActivity(User &client);
         int _reciveRequest(User &client);
         int _sendResponse(User &client);
+        void _disconnect(std::vector<User>::iterator &thisClient);
 
 };
 
