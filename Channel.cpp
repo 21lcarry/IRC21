@@ -35,9 +35,9 @@ unsigned char Channel::getFlags() const {
 bool Channel::containsNickname(std::string nic) const {
 	std::vector<const User *>::const_iterator it = _users.cbegin();
 	std::vector<const User *>::const_iterator end = _users.cend();
-std::cout <<"size=" <<	_users.size();
+std::cout <<"size= " <<	_users.size();
 	while (it != end) {
-		std::cout << "^^^^"<< (*it)->getInfo().nickname <<std::endl;
+		std::cout << " "<< (*it)->getInfo().nickname <<std::endl;
 		if ((*it)->getInfo().nickname == nic)
 			return (true);
 		it++;
@@ -69,12 +69,9 @@ void Channel::sendMessage(const std::string &message, const User &from,
 	msg += ":" + from.getPrefix() + " " + message;
 	std::vector<const User *>::const_iterator begin = _users.begin();
 	std::vector<const User *>::const_iterator end = _users.end();
-	std::cout << "!!!!!!!!!!!!!!!!!!!V\n";
 	for (; begin != end; ++begin) {
 		bool t =  *begin != &from;
-		std::cout << "!!!!!!!!!!!!!!!!!!!% " << includeUser << " " << t ;
 		if (includeUser || *begin != &from){
-			std::cout << !!!!!!!!!!!!!!!!!!!!!!!!!"@\n";
 			(*begin)->sendMessage(msg);}
 	}
 }

@@ -9,22 +9,19 @@ int Command::_cmdMODE(std::string &prefix, std::vector<std::string> &param)
 	{
 		if (param[0][0] == '#')
 		{
-			if (!_server.containsChannel(param[0])){
-std::cout <<"~~1\n";
+			if (!_server.containsChannel(param[0]))
 				utils::_errorSend(_user, ERR_NOSUCHCHANNEL, param[0]);
-			}
-			else if (!_server.getChannels().at(param[0]).isOperator(_user)) {std::cout <<"~~2\n";
+			else if (!_server.getChannels().at(param[0]).isOperator(_user))
 				utils::_errorSend(_user, ERR_CHANOPRIVSNEEDED, param[0]);
-			}
-			else if (!_server.getChannels().at(param[0]).containsNickname(_user.getInfo().nickname)){ std::cout <<"~~3\n";
-				utils::_errorSend(_user, ERR_NOTONCHANNEL, param[0]);}
-			else if (param.size() == 1) {std::cout <<"~~4\n";
+			else if (!_server.getChannels().at(param[0]).containsNickname(_user.getInfo().nickname))
+				utils::_errorSend(_user, ERR_NOTONCHANNEL, param[0]);
+			else if (param.size() == 1) {
 				utils::sendReply(_user.getFd(), _user.getInfo().servername,
 								 _user.getInfo(), RPL_CHANNELMODEIS, param[0],
 								 _server.getChannels().at(
 										 param[0]).getFlagsAsString());
 			} else if (_server.handleChanFlags(param, _user, "MODE") != -1)
-			{std::cout <<"~~5\n";
+			{
 				std::string	flag = param[1];
 				std::string	tmp = (flag[1] == 'o' || flag[1] == 'v') ? " " + param[2] : "";
 				Channel &channels = _server.getChannels().at(param[0]);

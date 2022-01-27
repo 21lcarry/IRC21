@@ -55,7 +55,7 @@ int Command::_authorization()
 			{
 				_user.setAuthorized(true);
 
-				_server.addUserHistoru(infoUser);//  todo возможно стоит  запихнуть в _user.setAuthorized
+				_server.addUserHistoru(infoUser);
 				UserInfo userinfo = _user.getInfo();
 				std::string test = "*MOTD reply should be here*\n";
 				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_MOTDSTART, userinfo.servername);

@@ -55,7 +55,6 @@ private:
 
 	int							_fd;
 	UserInfo					_info;
-//	std::vector<UserHistory>	_history;
 	int							_send;
 	std::vector<std::string>	_request;
 	std::queue<std::string>		_raw_requests;
@@ -66,10 +65,6 @@ private:
     unsigned int        		_msg_delay;
 	int							_queue;
 
-//	std::string	_nick;
-//	std::string	_host;
-//	std::string	_name;
-//	std::string	_server;
 public:
 	User();
 	User(int sock_fd, std::string servername);

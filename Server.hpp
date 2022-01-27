@@ -12,15 +12,15 @@
 #define MAX_INACTIVE 60U
 #define MAX_RESPONSE 120U
 #define MAX_CHANNEl 10
-#define VERSION "1.0.0" //todo
-#define debuglvl "1" // todo
-#define NAME_SERVER "ircServer"
-#define comments "" //todo
-#define describe "" //todo
-#define INFO_SERVER "" //todo
-#define adminName "" //todo
-#define adminNickname "" //todo
-#define adminEmail "" //todo
+#define VERSION "1.0.0"
+#define debuglvl "1"
+#define NAME_SERVER "IRCserv"
+#define comments ""
+#define describe ""
+#define INFO_SERVER ""
+#define adminName ""
+#define adminNickname ""
+#define adminEmail ""
 #define MAX_USERS 256
 class Server
 {
@@ -36,7 +36,6 @@ class Server
         const std::vector<User> &getClients();
         const std::string &getPass();
 		bool userIsConnecting(std::string &nickname) const;
-		//std::vector<User> getClient(); //todo dublicate
 		UserHistory *getHistory();
 		void addUserHistoru(const UserInfo &info);
 		std::vector< const UserInfo *>
@@ -64,7 +63,6 @@ private:
         id_t                _spam_flag;
         std::map<std::string, std::string> _operators;
 	    std::map<std::string, Channel>		_channels;
-        //std::vector<UserHistory>	_history;
     	UserHistory 	_history;
 
 

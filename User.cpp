@@ -153,10 +153,6 @@ const std::string &User::getPwd()
 
 void User::setFlag(unsigned char flag) {
 	_info.flags |= flag;
-	// todo
-	//if (flag == BREAKCONNECTION && quitMessage.size() == 0)
-	//	quitMessage = "Client exited";
-
 }
 
 void User::setActivity(time_t time)
@@ -198,7 +194,7 @@ void User::sendMessage(const std::string &msg) const {
 	if (msg.size() > 0){
 
 
-		bytes = send(_fd, msg.c_str(), msg.size(), IRC_NOSIGNAL); // todo возможно не _fd
+		bytes = send(_fd, msg.c_str(), msg.size(), IRC_NOSIGNAL);
 		std::cout <<"{" <<bytes <<"}" <<std::endl;
 		 }
 	if (bytes < 0)
@@ -221,8 +217,6 @@ unsigned int &User::getDelay()
 }
 
 std::string User::getPrefix() const {
-//	std::string prefix = _info.nickname + "!" + _info.username + "@" + _info.hostname;
-
 	return std::string(_info.nickname + "!" + _info.username + "@" + _info.hostname);
 }
 

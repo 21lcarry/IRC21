@@ -90,7 +90,7 @@ public:
 	void displayChanInfo(const User &user);
 
 	std::string getFlagsAsString() const;
-int sizeUsers() const;
+	int sizeUsers() const;
 	virtual ~Channel();
 	Channel();
 private:
@@ -115,4 +115,4 @@ private:
 
 std::ostream &operator<<(std::ostream &out, Channel const &source);
 
-#endif //IRC_CHANEL_HH
+#endif

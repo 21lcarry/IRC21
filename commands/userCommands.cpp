@@ -11,7 +11,6 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		return (utils::_errorSend(_user, ERR_NORECIPIENT, command));
 	if (param.size() == 1)
 		return (utils::_errorSend(_user, ERR_NOTEXTTOSEND));
-	std::cout << "####1\n";
 	std::string msg;
 	std::queue<std::string> receivers = utils::split(param[0], ',', false);
 	std::set<std::string> uniqReceivers;
@@ -25,22 +24,17 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
 	while (receivers.size() > 0)
 	{
-		// checking if there contains dublicate receiver
 		if (uniqReceivers.find(receivers.front()) != uniqReceivers.end())
 			return (utils::_errorSend(_user, ERR_TOOMANYTARGETS, receivers.front()));
-		// if receiver is channel
 		if (receivers.front()[0] == '#' || receivers.front()[0] == '&')
 		{
-			// checking if there such a channel
 			if (!_server.containsChannel(receivers.front()))
 				return (utils::_errorSend(_user, ERR_NOSUCHNICK, receivers.front()));
-			// check that the current user is in the channel
 			Channel & c = _server.getChannels()[receivers.front()];
 			if (!c.containsNickname(_user.getInfo().nickname)){
 				std::cout << "####2 " <<_user.getInfo().nickname << std::endl;
 				return (utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, receivers.front()));}
 		}
-			// checking if there such a nickname
 		else if (!_server.containsNickname(receivers.front()))
 			return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
 		uniqReceivers.insert(receivers.front());
@@ -51,7 +45,6 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		if ((*it)[0] == '#' || (*it)[0] == '&')
 		{
 			Channel &receiverChannel = _server.getChannels()[*it];
-			// check that user can send message to channel (user is operator or speaker on moderated channel)
 
 			if (receiverChannel.getFlags() & MODERATED && (!receiverChannel.isOperator(_user) && !receiverChannel.isSpeaker(_user)))
 				utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, *it);
@@ -191,7 +184,7 @@ int Command::_cmdWHOWAS(std::string &prefix, std::vector<std::string> &param)
 				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_WHOWASUSER, historyList[i]->nickname, \
 				historyList[i]->username, historyList[i]->hostname, historyList[i]->realname);
 				utils::sendReply(_user.getFd(), userinfo.servername, userinfo, RPL_WHOISSERVER, historyList[i]->nickname, \
-				historyList[i]->servername, "IRC server based on TCP/IP protocol to rfc1459 standard");
+				historyList[i]->servername, "IRC server based on rfc1459 standard");
 			}
 		}
 	}

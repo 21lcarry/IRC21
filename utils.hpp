@@ -20,4 +20,4 @@ namespace utils {
 	bool	isValidChannelName(const std::string &name);
 };
 
-#endif //IRC_UTILS_HPP
+#endif

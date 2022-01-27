@@ -127,7 +127,7 @@ namespace utils{
 				msg += arg1 + " :Rehashing\n";
 				break;
 			case RPL_TIME:
-				msg += arg1 + " :" + arg2; // ctime return string following '\n'
+				msg += arg1 + " :" + arg2;
 				break;
 			case RPL_USERSSTART:
 				msg += ":UserID   Terminal  Host\n";
@@ -151,7 +151,7 @@ namespace utils{
 				msg += "H.S. " + arg1 + " " + arg2 + "\n";
 				break;
 			case RPL_TRACEUNKNOWN:
-				msg += "???? " + arg1 + " " + arg2 + "\n"; // todo ????
+				msg += "???? " + arg1 + " " + arg2 + "\n";
 				break;
 			case RPL_TRACEOPERATOR:
 				msg += "Oper " + arg1 + " " + arg2 + "\n";
@@ -198,7 +198,7 @@ namespace utils{
 				msg += "L " + arg1 + " * " + arg2 + " " + arg3 + "\n";
 				break;
 			case RPL_STATSUPTIME:
-				msg += ":Server Up %d days %d:%02d:%02d\n"; // todo Поменять
+				msg += ":Server Up %d days %d:%02d:%02d\n";
 				break;
 			case RPL_STATSOLINE:
 				msg += "O " + arg1 + " * " + arg2 + "\n";

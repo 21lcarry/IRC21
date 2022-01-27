@@ -1,6 +1,4 @@
 #include "Server.hpp"
-
-/* todo ????????????????????????????????????????? */
 #define MAX_INPUT 510
 
 Server::Server(const std::string &pwd, int &port) : _ip(0), _port(port), _pass(pwd), _opt(1), _serverName("IRCserv"), _spam_flag(0)
@@ -35,8 +33,7 @@ void Server::newConnection()
         std::cerr << "ircserv: accept() failed: " <<  std::strerror(errno) << std::endl;
 
 	setsockopt(newSocket, SOL_SOCKET, IRC_NOSIGNAL, &_opt, (socklen_t)sizeof(_opt));
-//	int flag = fcntl(newSocket, F_GETFL);
-	fcntl(newSocket, F_SETFL, O_NONBLOCK);  //subject
+	fcntl(newSocket, F_SETFL, O_NONBLOCK);
 	_clients.push_back(User(newSocket, _serverName));
 	std::cout << "New connection with socket fd" << newSocket << "\n";
 }
@@ -45,7 +42,7 @@ bool Server::_checkConnect(User &client)
 {
     if (client.authorized() && time(0) - client.getActivity() > static_cast<time_t>(MAX_INACTIVE) && !(client.getFlag() & PINGING))
 	{
-        std::cout << "\n PING to client fd " << client.getFd() << "\n\n";
+        std::cout << "\n\nPING to client fd " << client.getFd() << "\n\n";
 		client.sendMessage(":" + client.getInfo().servername + " PING :" + client.getInfo().servername + "\n");
 		client.setFlag(PINGING);
 	}
@@ -91,19 +88,14 @@ void Server::_disconnect(std::vector<User>::iterator &thisClient)
             }
         }
     }
-	std::cout << ">>>delet channel " << chans.size() << std::endl;
 
     for (type_channel_arr::const_iterator i = chans.begin(); i != chans.end(); ++i)
     {
         std::cout << std::to_string(j++) << ":" <<  thisClient->getFd() << " DISCONNECT\n";
         const Channel *chan = *i;
         const_cast<Channel*>(chan)->disconnect(*thisClient);
-		std::cout << ">>delet channel " << chan->getName() << std::endl;
         if(const_cast<Channel*>(chan)->isEmpty())
-		{
-			std::cout << "<<delet channel " << chan->getName() << std::endl;
 			_channels.erase(chan->getName());
-		}
     }
     close(thisClient->getFd());
     _clients.erase(thisClient);
@@ -166,8 +158,6 @@ void Server::run()
                     FD_CLR(sdTmp, &writeSet);
                     thisClient->setFlag(BREAKCONNECTION);
                     _disconnect(thisClient);
-       //             close(thisClient->getFd());
-        //            _clients.erase(thisClient);
                     std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
                     break ;
                 }
@@ -181,7 +171,6 @@ void Server::run()
                     FD_CLR(sdTmp, &writeSet);
                     thisClient->setFlag(BREAKCONNECTION);
                     _disconnect(thisClient);
-   //                 _clients.erase(thisClient);
                     std::cerr << "ircserv: read [" << thisClient->getFd() << "] socket error" << std::endl;
                     break ;
                 }
@@ -191,7 +180,6 @@ void Server::run()
                     FD_CLR(sdTmp, &writeSet);
                     thisClient->setFlag(BREAKCONNECTION);
                     _disconnect(thisClient);
-         //           _clients.erase(thisClient);
                     std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
                     break ;
                 }
@@ -205,8 +193,6 @@ void Server::run()
                     FD_CLR(sdTmp, &writeSet);
                     FD_CLR(sdTmp, &readSet);
                     _disconnect(thisClient);
-     //               close(thisClient->getFd());
-       //             _clients.erase(thisClient);
                     break;
                 }
                 else if (rc < 0)
