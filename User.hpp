@@ -94,6 +94,7 @@ public:
 	void	addChannel(const Channel &channel);
 	bool	isOnChannel(const std::string &name) const;
 	void	removeChannel(const std::string &name);
+	type_channel_arr &loadChannels();
 };
 
 #endif

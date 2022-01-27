@@ -74,19 +74,24 @@ int Server::_checkActivity(User &client)
 
 void Server::_disconnect(std::vector<User>::iterator &thisClient)
 {
-    type_channel_arr chans = thisClient->getInfo().channels;
+    type_channel_arr &chans = thisClient->loadChannels();
     int j = 0;
+	std::cout << ">>>delet channel " << chans.size() << std::endl;
 
-    close(thisClient->getFd());
     for (type_channel_arr::const_iterator i = chans.begin(); i != chans.end(); ++i)
     {
         std::cout << std::to_string(j++) << ":" <<  thisClient->getFd() << " DISCONNECT\n";
         const Channel *chan = *i;
         const_cast<Channel*>(chan)->disconnect(*thisClient);
+		std::cout << ">>delet channel " << chan->getName() << std::endl;
         if(const_cast<Channel*>(chan)->isEmpty())
-            _channels.erase(chan->getName());
+		{
+			std::cout << "<<delet channel " << chan->getName() << std::endl;
+			_channels.erase(chan->getName());
+		}
     }
     _clients.erase(thisClient);
+	close(thisClient->getFd());
 }
 
 void Server::run()
@@ -336,7 +341,7 @@ bool	Server::containsNickname(const std::string &nickname) const
 	return (false);
 }
 
-std::map<std::string, Channel *> Server::getChannels() {
+std::map<std::string, Channel > &Server::getChannels() {
 	return _channels;
 }
 
@@ -364,13 +369,13 @@ int Server::connectToChannel(const User &user, const std::string &name,
 							 const std::string &key) {
 	try
 	{
-		Channel	*tmp = _channels.at(name);
-		tmp->connect(user, key);
+		Channel	&tmp = _channels.at(name);
+		tmp.connect(user, key);
 		return (1);
 	}
 	catch(const std::exception& e)
 	{
-		_channels[name] = new Channel(name, user, key);
+		_channels[name] =  Channel(name, user, key);
 	}
 	return (1);
 }
@@ -418,7 +423,7 @@ int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const 
 		else if (!containsNickname(param[2]))
 			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
 		else
-			_channels[chanName]->addOperator(*(getUserByName(param[2])));
+			_channels[chanName].addOperator(*(getUserByName(param[2])));
 	}
 	else if (flag == "-o")
 	{
@@ -427,59 +432,59 @@ int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const 
 		else if (!containsNickname(param[2]))
 			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
 		else
-			_channels[chanName]->removeOperator(*(getUserByName(param[2])));
+			_channels[chanName].removeOperator(*(getUserByName(param[2])));
 	}
 	else if (flag == "+p")
-		_channels[chanName]->setFlag(PRIVATE);
+		_channels[chanName].setFlag(PRIVATE);
 	else if (flag == "-p")
-		_channels[chanName]->removeFlag(PRIVATE);
+		_channels[chanName].removeFlag(PRIVATE);
 	else if (flag == "+s")
-		_channels[chanName]->setFlag(SECRET);
+		_channels[chanName].setFlag(SECRET);
 	else if (flag == "-s")
-		_channels[chanName]->removeFlag(SECRET);
+		_channels[chanName].removeFlag(SECRET);
 	else if (flag == "+i")
-		_channels[chanName]->setFlag(INVITEONLY);
+		_channels[chanName].setFlag(INVITEONLY);
 	else if (flag == "-i")
-		_channels[chanName]->removeFlag(INVITEONLY);
+		_channels[chanName].removeFlag(INVITEONLY);
 	else if (flag == "+t")
-		_channels[chanName]->setFlag(TOPICSET);
+		_channels[chanName].setFlag(TOPICSET);
 	else if (flag == "-t")
-		_channels[chanName]->removeFlag(TOPICSET);
+		_channels[chanName].removeFlag(TOPICSET);
 	else if (flag == "+n")
 	{}
 	else if (flag == "-n")
 	{}
 	else if (flag == "+m")
-		_channels[chanName]->setFlag(MODERATED);
+		_channels[chanName].setFlag(MODERATED);
 	else if (flag == "-m")
-		_channels[chanName]->removeFlag(MODERATED);
+		_channels[chanName].removeFlag(MODERATED);
 	else if (flag == "+l")
 	{
 		if (param.size() < 3)
 			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
 		else
-			_channels[chanName]->setLimit(atoi(param[2].c_str()));
+			_channels[chanName].setLimit(atoi(param[2].c_str()));
 	}
 	else if (flag == "-l")
 	{
 		if (param.size() < 3)
 			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
 		else
-			_channels[chanName]->setLimit(0);
+			_channels[chanName].setLimit(0);
 	}
 	else if (flag == "+b")
 	{
 		if (param.size() < 3)
 			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
 		else
-			_channels[chanName]->addBanMask(param[2]);
+			_channels[chanName].addBanMask(param[2]);
 	}
 	else if (flag == "-b")
 	{
 		if (param.size() < 3)
 			return utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
 		else
-			_channels[chanName]->removeBanMask(param[2]);
+			_channels[chanName].removeBanMask(param[2]);
 	}
 	else if (flag == "+v")
 	{
@@ -488,7 +493,7 @@ int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const 
 		else if (!containsNickname(param[2]))
 			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
 		else
-			_channels[chanName]->addSpeaker(*(getUserByName(param[2])));
+			_channels[chanName].addSpeaker(*(getUserByName(param[2])));
 	}
 	else if (flag == "-v")
 	{
@@ -497,21 +502,21 @@ int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const 
 		else if (!containsNickname(param[2]))
 			return utils::_errorSend(user, ERR_NOSUCHNICK, param[2]);
 		else
-			_channels[chanName]->removeSpeaker(*(getUserByName(param[2])));
+			_channels[chanName].removeSpeaker(*(getUserByName(param[2])));
 	}
 	else if (flag == "+k")
 	{
 		if (param.size() < 3)
 			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
 		else
-			_channels[chanName]->setKey(user, param[2]);
+			_channels[chanName].setKey(user, param[2]);
 	}
 	else if (flag == "-k")
 	{
 		if (param.size() < 3)
 			return  utils::_errorSend(user, ERR_NEEDMOREPARAMS, commands);
 		else
-			_channels[chanName]->setKey(user, "");
+			_channels[chanName].setKey(user, "");
 	}
 	else
 		return utils::_errorSend(user, ERR_UNKNOWNMODE, flag);

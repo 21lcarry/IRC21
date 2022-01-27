@@ -11,7 +11,7 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		return (utils::_errorSend(_user, ERR_NORECIPIENT, command));
 	if (param.size() == 1)
 		return (utils::_errorSend(_user, ERR_NOTEXTTOSEND));
-
+std::cout << "####1\n";
 	std::string msg;
 	std::queue<std::string> receivers = utils::split(param[0], ',', false);
 	std::set<std::string> uniqReceivers;
@@ -37,8 +37,10 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 			if (!_server.containsChannel(receivers.front()))
 				return (utils::_errorSend(_user, ERR_NOSUCHNICK, receivers.front()));
 			// check that the current user is in the channel
-			if (!_server.getChannels()[receivers.front()]->containsNickname(_user.getInfo().nickname))
-				return (utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, receivers.front()));
+			Channel & c = _server.getChannels()[receivers.front()];
+			if (!c.containsNickname(_user.getInfo().nickname)){
+				std::cout << "####2 " <<_user.getInfo().nickname << std::endl;
+				return (utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, receivers.front()));}
 		}
 			// checking if there such a nickname
 		else if (!_server.containsNickname(receivers.front()))
@@ -50,13 +52,13 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 	{
 		if ((*it)[0] == '#' || (*it)[0] == '&')
 		{
-			Channel *receiverChannel = _server.getChannels()[*it];
+			Channel &receiverChannel = _server.getChannels()[*it];
 			// check that user can send message to channel (user is operator or speaker on moderated channel)
 
-			if (receiverChannel->getFlags() & MODERATED && (!receiverChannel->isOperator(_user) && !receiverChannel->isSpeaker(_user)))
+			if (receiverChannel.getFlags() & MODERATED && (!receiverChannel.isOperator(_user) && !receiverChannel.isSpeaker(_user)))
 				utils::_errorSend(_user, ERR_CANNOTSENDTOCHAN, *it);
 			else
-				receiverChannel->sendMessage(command + " " + *it + " :" + msg + "\n", _user, false);
+				receiverChannel.sendMessage(command + " " + *it + " :" + msg + "\n", _user, false);
 		}
 		else
 		{

@@ -195,8 +195,12 @@ void User::setAwayMessage(const std::string &msg) {
 
 void User::sendMessage(const std::string &msg) const {
 	int bytes;
-	if (msg.size() > 0)
+	if (msg.size() > 0){
+
+
 		bytes = send(_fd, msg.c_str(), msg.size(), IRC_NOSIGNAL); // todo возможно не _fd
+		std::cout <<"{" <<bytes <<"}" <<std::endl;
+		 }
 	if (bytes < 0)
 		std::cerr << "ircserv: send() failed on sendMessage() [" << _fd << "]: " <<  std::strerror(errno) << std::endl;
 }
@@ -224,6 +228,7 @@ std::string User::getPrefix() const {
 
 void User::addChannel(const Channel &channel) {
 	_info.channels.push_back(&channel);
+	std::cout << "size user channels " <<_info.channels.size() <<std::endl;
 }
 
 User::User() {
@@ -246,6 +251,10 @@ void User::removeChannel(const std::string &name) {
 		if ((*begin)->getName() == name)
 			break ;
 	_info.channels.erase(begin);
+}
+
+type_channel_arr &User::loadChannels() {
+	return _info.channels;
 }
 
 UserInfo::UserInfo() {

@@ -26,7 +26,7 @@
 
 class Channel {
 public:
-
+	typedef  std::vector<const User *> type_user_array;
 	Channel(const std::string &name, const User &creator,
 			const std::string &pass = "");
 
@@ -81,7 +81,7 @@ public:
 
 	void displayTopic(const User &user);
 
-	void displayNames(const User &user);
+	void displayNames(const User &user)  ;
 
 	void disconnect(const User &user);
 
@@ -90,21 +90,21 @@ public:
 	void displayChanInfo(const User &user);
 
 	std::string getFlagsAsString() const;
-
+int sizeUsers() const;
 	virtual ~Channel();
-
-private:
 	Channel();
+private:
+
 	std::string _name;
-	std::vector<const User *> _operators;
-	std::vector<const User *> _speakers;
+	type_user_array _operators;
+	type_user_array _speakers;
 	std::string _pass;
 	unsigned short _userLimit;
 	std::vector<std::string> _banMasks;
 	unsigned char _flags;
-	std::vector<const User *> _users;
+	type_user_array _users;
 	std::string _topic;
-	std::vector<const User *> _invitedUsers;
+	type_user_array _invitedUsers;
 
 	bool isBanned(const std::string &mask, const std::string &prefix);
 

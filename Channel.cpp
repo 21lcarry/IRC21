@@ -33,9 +33,11 @@ unsigned char Channel::getFlags() const {
 }
 
 bool Channel::containsNickname(std::string nic) const {
-	std::vector<const User *>::const_iterator it = _users.begin();
-	std::vector<const User *>::const_iterator end = _users.end();
+	std::vector<const User *>::const_iterator it = _users.cbegin();
+	std::vector<const User *>::const_iterator end = _users.cend();
+std::cout <<"size=" <<	_users.size();
 	while (it != end) {
+		std::cout << "^^^^"<< (*it)->getInfo().nickname <<std::endl;
 		if ((*it)->getInfo().nickname == nic)
 			return (true);
 		it++;
@@ -67,9 +69,13 @@ void Channel::sendMessage(const std::string &message, const User &from,
 	msg += ":" + from.getPrefix() + " " + message;
 	std::vector<const User *>::const_iterator begin = _users.begin();
 	std::vector<const User *>::const_iterator end = _users.end();
+	std::cout << "!!!!!!!!!!!!!!!!!!!V\n";
 	for (; begin != end; ++begin) {
-		if (includeUser || *begin != &from)
-			(*begin)->sendMessage(msg);
+		bool t =  *begin != &from;
+		std::cout << "!!!!!!!!!!!!!!!!!!!% " << includeUser << " " << t ;
+		if (includeUser || *begin != &from){
+			std::cout << !!!!!!!!!!!!!!!!!!!!!!!!!"@\n";
+			(*begin)->sendMessage(msg);}
 	}
 }
 
@@ -138,10 +144,10 @@ void Channel::disconnect(const User &user) {
 	}
 }
 
-void Channel::displayNames(const User &user) {
+void Channel::displayNames(const User &user)   {
 	std::string names;
-	std::vector<const User *>::const_iterator it = _users.begin();
-	std::vector<const User *>::const_iterator end = _users.end();
+	type_user_array::iterator it = _users.begin();
+	type_user_array::iterator end = _users.end();
 	while (it != end) {
 		const UserInfo userinfo = (*it)->getInfo();
 		if (isOperator(**it))
@@ -343,6 +349,15 @@ Channel &Channel::copy(const Channel &other) {
 	_userLimit = other._userLimit;
 	return *this;
 }
+
+Channel::Channel() {
+
+}
+
+int Channel::sizeUsers() const {
+	return _users.size();
+}
+
 
 std::ostream &operator<<(std::ostream &out, Channel const &source) {
 	out << "Channel name:  " << source.getName() << " topic: "

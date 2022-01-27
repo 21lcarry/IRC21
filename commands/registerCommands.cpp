@@ -71,12 +71,12 @@ int Command::_authorization()
 
 void Command::_notifyUsers(const std::string &msg)
 {
-	const std::vector<const Channel *> chans = _user.getInfo().channels;
+	 std::vector<const Channel *> chans = _user.getInfo().channels;
 	for (size_t i = 0; i < _server.getClients().size(); ++i)
 	{
 		for (size_t j = 0; j < chans.size(); j++)
 		{
-			if (chans[j]->containsNickname(_server.getClients()[i].getInfo().nickname))
+			if (chans.at(j)->containsNickname(_server.getClients()[i].getInfo().nickname))
 			{
 				_server.getClients()[i].sendMessage(msg);
 				break ;

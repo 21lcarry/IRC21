@@ -42,7 +42,7 @@ class Server
 		std::vector< const UserInfo *>
 		getHistoryByUser(const std::string &nickname) const;
 		bool	containsNickname(const std::string &nickname) const;
-		std::map<std::string, Channel *>	getChannels();
+		std::map<std::string, Channel >	&getChannels();
         bool	containsChannel(const std::string &name) const;
         User	*getUserByName(const std::string &name);
         int		connectToChannel(const User &user, const std::string &name, const std::string &key);
@@ -62,7 +62,7 @@ private:
         std::string         _serverName;
         id_t                _spam_flag;
         std::map<std::string, std::string> _operators;
-	    std::map<std::string, Channel *>		_channels;
+	    std::map<std::string, Channel>		_channels;
         //std::vector<UserHistory>	_history;
     	UserHistory 	_history;
 
