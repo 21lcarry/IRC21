@@ -126,7 +126,7 @@ int Command::_cmdINVITE(std::string &prefix, std::vector<std::string> &param)
 		else
 			chan.invite(_user, receiver);
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdKICK(std::string &prefix, std::vector<std::string> &param)
 {
@@ -154,7 +154,7 @@ int Command::_cmdKICK(std::string &prefix, std::vector<std::string> &param)
 		chan.disconnect(*(_server.getUserByName(param[1])));
 		_server.getUserByName(param[1])->removeChannel(param[0]);
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdPART(std::string &prefix, std::vector<std::string> &param)
 {
@@ -182,7 +182,7 @@ int Command::_cmdPART(std::string &prefix, std::vector<std::string> &param)
 			chans.pop();
 		}
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdNAMES(std::string &prefix, std::vector<std::string> &param)
 {
@@ -239,7 +239,7 @@ int Command::_cmdNAMES(std::string &prefix, std::vector<std::string> &param)
 			chansToDisplay.pop();
 		}
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdLIST(std::string &prefix, std::vector<std::string> &param)
 {
@@ -268,5 +268,5 @@ int Command::_cmdLIST(std::string &prefix, std::vector<std::string> &param)
 	for (size_t i = 0; i < chansToDisplay.size(); ++i)
 		_server.getChannels().at(chansToDisplay[i]).displayChanInfo(_user);
 	utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_LISTEND);
-	return 0;
+	return 1;
 }

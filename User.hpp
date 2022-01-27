@@ -21,6 +21,21 @@ typedef  std::vector<const Channel *> type_channel_arr;
 struct UserInfo
 {
 	UserInfo();
+	bool operator==(const UserInfo &r) const
+	{
+		if (nickname != r.nickname)
+			return false;
+		else if (username != r.nickname)
+			return false;
+		else if (hostname != r.hostname)
+			return false;
+		else if (servername != r.hostname)
+			return false;
+		else if (realname != r.realname)
+			return false;
+		else
+			return true;
+	};
 
 	std::string							nickname;
 	std::string							username;

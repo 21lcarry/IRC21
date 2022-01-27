@@ -58,6 +58,7 @@ class Command {
         int _cmdINFO(std::string &prefix, std::vector<std::string> &param);
         int _cmdADMIN(std::string &prefix, std::vector<std::string> &param);
         int _cmdTIME(std::string &prefix, std::vector<std::string> &param);
+        int _cmdPONG(std::string &prefix, std::vector<std::string> &param);
         /*************************/
         
         bool _validateNick(std::string &nick);

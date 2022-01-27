@@ -20,5 +20,13 @@ UserHistory::~UserHistory() {
 }
 
 void UserHistory::addHistoryByUser(const UserInfo &info) {
-	_historyList.push_back(info);
+	/*bool flag = false;
+	for(std::vector<UserInfo>::const_iterator i = _historyList.begin(); i != _historyList.end(); ++i)
+		if ((flag = *i == info))
+		{
+			std::cout << "true\n";
+			break ;
+		}
+	if (!flag)*/
+		_historyList.push_back(info);
 }

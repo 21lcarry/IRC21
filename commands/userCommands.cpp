@@ -11,20 +11,18 @@ int Command::_cmdPRIVMSG_(std::string &prefix, std::vector<std::string> &param,
 		return (utils::_errorSend(_user, ERR_NORECIPIENT, command));
 	if (param.size() == 1)
 		return (utils::_errorSend(_user, ERR_NOTEXTTOSEND));
-std::cout << "####1\n";
+	std::cout << "####1\n";
 	std::string msg;
 	std::queue<std::string> receivers = utils::split(param[0], ',', false);
 	std::set<std::string> uniqReceivers;
 	UserInfo infoUser = _user.getInfo();
-	if (command == "NOTICE" && (receivers.size() > 1 \
-	|| receivers.front()[0] == '#' || receivers.front()[0] == '&'))
-		return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
 
 	for (std::vector<std::string>::iterator it = (param.begin() + 1); it != param.end(); ++it)
 		msg += (((*it)[0] == ':') ? it->substr(1, it->size() - 1) : *it) + " ";
 	msg = msg.substr(0, msg.size() - 1);
-
-
+	if (command == "NOTICE" && (receivers.size() > 1 \
+	|| receivers.front()[0] == '#' || receivers.front()[0] == '&'))
+		return (utils::_errorSend(_user, ERR_NOSUCHNICK, param[0]));
 	while (receivers.size() > 0)
 	{
 		// checking if there contains dublicate receiver
@@ -64,16 +62,18 @@ std::cout << "####1\n";
 		{
 			if (command == "PRIVMSG" && (_server.getUserByName(*it)->getInfo().flags & AWAY))
 				utils::sendReply(_user.getFd(), infoUser.servername, infoUser, RPL_AWAY, *it, _server.getUserByName(*it)->getInfo().awayMessage);
-			if (command != "NOTICE" || (_server.getUserByName(*it)->getInfo().flags & RECEIVENOTICE))
+			if (command == "NOTICE" && !(_server.getUserByName(*it)->getInfo().flags & RECEIVENOTICE))
+				_server.getUserByName(*it)->sendMessage(":" + _user.getPrefix() + " " + command + " " + *it + " :" + msg + "\n");
+			else if (command != "NOTICE" || (_server.getUserByName(*it)->getInfo().flags & RECEIVENOTICE))
 				_server.getUserByName(*it)->sendMessage(":" + _user.getPrefix() + " " + command + " " + *it + " :" + msg + "\n");
 		}
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdPRIVMSG(std::string &prefix, std::vector<std::string> &param)
 {
 	_cmdPRIVMSG_(prefix,param,"PRIVMSG");
-	return 0;
+	return 1;
 }
 
 int Command::_cmdAWAY(std::string &prefix, std::vector<std::string> &param)
@@ -90,12 +90,12 @@ int Command::_cmdAWAY(std::string &prefix, std::vector<std::string> &param)
 		_user.setAwayMessage(param[0]);
 		utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_NOWAWAY);
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdNOTICE(std::string &prefix, std::vector<std::string> &param)
 {
 	_cmdPRIVMSG_(prefix,param, "NOTICE");
-    return 0;
+    return 1;
 }
 int Command::_cmdWHO(std::string &prefix, std::vector<std::string> &param)
 {

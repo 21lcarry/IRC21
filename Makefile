@@ -17,7 +17,7 @@ SRCS =	main.cpp\
 SRC1 =	main1.cpp\
 		User.cpp
 
-COMP = clang++ -g -d -std=c++98 -fsanitize=address
+COMP = clang++ -Werror -Wextra -Wall -std=c++98 -fsanitize=address
 
 OBJS = $(SRCS:.cpp=.o)
 

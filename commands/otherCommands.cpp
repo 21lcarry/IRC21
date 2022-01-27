@@ -14,7 +14,7 @@ int Command::_cmdWALLOPS(std::string &prefix, std::vector<std::string> &param)
 			usersList[i].sendMessage(":" + _user.getPrefix() + " " \
 			+"WALLOPS" + " :" + param[0] + "\n");
 	}
-	return 0;
+	return 1;
 }
 int Command::_cmdPING(std::string &prefix, std::vector<std::string> &param)
 {
@@ -89,7 +89,7 @@ int Command::_cmdADMIN(std::string &prefix, std::vector<std::string> &param)
 	utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_ADMINLOC1, adminName);
 	utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_ADMINLOC2, adminNickname);
 	utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_ADMINEMAIL, adminEmail);
-	return 0;
+	return 1;
 }
 int Command::_cmdTIME(std::string &prefix, std::vector<std::string> &param)
 {
@@ -97,4 +97,11 @@ int Command::_cmdTIME(std::string &prefix, std::vector<std::string> &param)
 		return (utils::_errorSend(_user, ERR_NOSUCHSERVER, param[0]));
 	time_t tmp = time(0);
 	return (utils::sendReply(_user.getFd(),_user.getInfo().servername, _user.getInfo(), RPL_TIME, _user.getInfo().servername, ctime(&tmp)));
+}
+
+int		Command::_cmdPONG(std::string &prefix, std::vector<std::string> &param)
+{
+	if (param.size() <= 0 || param[0].substr(1, param[0].size()) != _server.getServerName())
+		return (utils::_errorSend(_user, ERR_NOSUCHSERVER, param.size() > 0 ? param[0] : ""));
+	return 1;
 }

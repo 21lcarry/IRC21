@@ -73,6 +73,7 @@ void Command::_initCommandMap()
     _commandMap["LIST"] = &Command::_cmdLIST;
     /*other*/
     _commandMap["WALLOPS"] = &Command::_cmdWALLOPS;
+	_commandMap["PONG"] = &Command::_cmdPONG;
     _commandMap["PING"] = &Command::_cmdPING;
     _commandMap["ISON"] = &Command::_cmdISON;
     _commandMap["USERHOST"] = &Command::_cmdUSERHOST;

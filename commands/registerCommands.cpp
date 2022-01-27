@@ -144,8 +144,15 @@ int Command::_cmdOPER(std::string &prefix, std::vector<std::string> &param)
 }
 int Command::_cmdQUIT(std::string &prefix, std::vector<std::string> &param)
 {
+	std::string msg;
+
+	for (std::vector<std::string>::iterator i = param.begin(); i != param.end(); ++i)
+		msg += (((*i)[0] == ':') ? i->substr(1, i->size() - 1) : *i) + " ";
+	if (msg.size() > 0)
+		msg = msg.substr(0, msg.size() - 1);
 	if (param.size() > 0)
-		_user.setInfo("quitMessage", param[0]);
+		_user.setInfo("quitMessage", msg);
+	_notifyUsers(":" + _user.getPrefix() + " QUIT :" + " " + msg + "\n");
 	_server.addUserHistoru(_user.getInfo());
 	return (-2);
 }

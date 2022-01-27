@@ -35,8 +35,8 @@ void Server::newConnection()
         std::cerr << "ircserv: accept() failed: " <<  std::strerror(errno) << std::endl;
 
 	setsockopt(newSocket, SOL_SOCKET, IRC_NOSIGNAL, &_opt, (socklen_t)sizeof(_opt));
-	int flag = fcntl(newSocket, F_GETFL);
-	fcntl(newSocket, F_SETFL, flag |  O_NONBLOCK);  //subject
+//	int flag = fcntl(newSocket, F_GETFL);
+	fcntl(newSocket, F_SETFL, O_NONBLOCK);  //subject
 	_clients.push_back(User(newSocket, _serverName));
 	std::cout << "New connection with socket fd" << newSocket << "\n";
 }
@@ -74,8 +74,23 @@ int Server::_checkActivity(User &client)
 
 void Server::_disconnect(std::vector<User>::iterator &thisClient)
 {
-    type_channel_arr &chans = thisClient->loadChannels();
+    type_channel_arr chans = thisClient->loadChannels();
     int j = 0;
+
+    if ((thisClient->getFlag() & BREAKCONNECTION))
+    {
+        for (size_t i = 0; i < _clients.size(); ++i)
+        {
+            for (size_t j = 0; j < chans.size(); j++)
+            {
+                if (chans.at(j)->containsNickname(_clients[i].getInfo().nickname))
+                {
+                    _clients[i].sendMessage(":" + thisClient->getPrefix() + " QUIT :" + " " + "disconnected" + "\n");
+                    break ;
+                }
+            }
+        }
+    }
 	std::cout << ">>>delet channel " << chans.size() << std::endl;
 
     for (type_channel_arr::const_iterator i = chans.begin(); i != chans.end(); ++i)
@@ -90,8 +105,8 @@ void Server::_disconnect(std::vector<User>::iterator &thisClient)
 			_channels.erase(chan->getName());
 		}
     }
+    close(thisClient->getFd());
     _clients.erase(thisClient);
-	close(thisClient->getFd());
 }
 
 void Server::run()
@@ -139,6 +154,7 @@ void Server::run()
                 std::cerr << "ircserv: client is disconnected due to inactivity. client: " << sdTmp << std::endl;
                 FD_CLR(sdTmp, &writeSet);
                 FD_CLR(sdTmp, &readSet);
+                thisClient->setFlag(BREAKCONNECTION);
                 _disconnect(thisClient);
                 break ;
             }
@@ -148,6 +164,7 @@ void Server::run()
                 {
                     FD_CLR(sdTmp, &readSet);
                     FD_CLR(sdTmp, &writeSet);
+                    thisClient->setFlag(BREAKCONNECTION);
                     _disconnect(thisClient);
        //             close(thisClient->getFd());
         //            _clients.erase(thisClient);
@@ -162,6 +179,7 @@ void Server::run()
                 {
                     FD_CLR(sdTmp, &readSet);
                     FD_CLR(sdTmp, &writeSet);
+                    thisClient->setFlag(BREAKCONNECTION);
                     _disconnect(thisClient);
    //                 _clients.erase(thisClient);
                     std::cerr << "ircserv: read [" << thisClient->getFd() << "] socket error" << std::endl;
@@ -171,6 +189,7 @@ void Server::run()
                 {
                     FD_CLR(sdTmp, &readSet);
                     FD_CLR(sdTmp, &writeSet);
+                    thisClient->setFlag(BREAKCONNECTION);
                     _disconnect(thisClient);
          //           _clients.erase(thisClient);
                     std::cerr << "ircserv: connection on socket [" << thisClient->getFd() << "] closed by client" << std::endl;
@@ -192,6 +211,7 @@ void Server::run()
                 }
                 else if (rc < 0)
                 {
+                    FD_CLR(sdTmp, &readSet);
                     FD_CLR(sdTmp, &writeSet);
                     break ;
                 }
@@ -521,4 +541,9 @@ int		Server::handleChanFlags(std::vector<std::string> &param, User &user, const 
 	else
 		return utils::_errorSend(user, ERR_UNKNOWNMODE, flag);
 	return 0;
+}
+
+const std::string &Server::getServerName() const
+{
+    return _serverName;
 }

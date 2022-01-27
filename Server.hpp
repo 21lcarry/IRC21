@@ -49,6 +49,7 @@ class Server
         int		handleChanFlags(std::vector<std::string> &param, User &user, const std::string &commands);
         int     handleUserFlags(std::string &flag, User &user);
         const std::map<std::string, std::string> &getOperators() const;
+        const std::string &getServerName() const;
 private:
         Server();
         std::string         _pass;
